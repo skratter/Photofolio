@@ -48,3 +48,9 @@ Thumbs.db
 # Bootstrap Cache
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
+
+# Laravel Boost
+.mcp.json
+boost.json
+CLAUDE.md
+AGENTS.md
