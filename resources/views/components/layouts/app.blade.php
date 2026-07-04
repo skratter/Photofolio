@@ -16,6 +16,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @fluxAppearance
 
     {{ $head ?? '' }}
 </head>
@@ -24,6 +25,7 @@
     {{ $slot }}
 
     @livewireScripts
+    @fluxScripts
 </body>
 
 </html>
