@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/admin/albums',
 
     /*
     |--------------------------------------------------------------------------
@@ -143,7 +143,7 @@ return [
     */
 
     'features' => [
-        Features::resetPasswords(),
+        // Features::resetPasswords(),
     ],
 
 ];

@@ -15,7 +15,6 @@ return [
 
     'component_locations' => [
         resource_path('views/components'),
-        resource_path('views/starter-kit/components'),
         resource_path('views/livewire'),
     ],
 
@@ -30,10 +29,7 @@ return [
     |
     */
 
-    'component_namespaces' => [
-        'layouts' => resource_path('views/starter-kit/layouts'),
-        'pages' => resource_path('views/starter-kit/pages'),
-    ],
+    'component_namespaces' => [],
 
     /*
     |---------------------------------------------------------------------------
