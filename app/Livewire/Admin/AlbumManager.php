@@ -8,7 +8,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class AlbumManager extends Component
 {
     public AlbumForm $form;
@@ -22,7 +22,7 @@ class AlbumManager extends Component
     #[Computed]
     public function albums()
     {
-        return Album::orderBy('sort_order')->orderBy('title')->get();
+        return Album::withCount('photos')->orderBy('sort_order')->orderBy('title')->get();
     }
 
     public function openCreateModal(): void

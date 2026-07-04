@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Photo extends Model
 {
@@ -33,7 +35,6 @@ class Photo extends Model
         'longitude',
         'exif_raw',
         'sort_order',
-        'visibility',
         'processed_at',
     ];
 
@@ -73,20 +74,33 @@ class Photo extends Model
         return $this->latitude !== null && $this->longitude !== null;
     }
 
+    public function directoryPath(): string
+    {
+        return Storage::disk('photos')->path((string) $this->id);
+    }
+
     public function displayPath(): string
     {
-        return storage_path("app/photos/{$this->id}/display.webp");
+        return Storage::disk('photos')->path("{$this->id}/display.webp");
     }
 
     public function thumbPath(): string
     {
-        return storage_path("app/photos/{$this->id}/thumb.webp");
+        return Storage::disk('photos')->path("{$this->id}/thumb.webp");
     }
 
     public function originalPath(): string
     {
         $extension = pathinfo($this->original_filename, PATHINFO_EXTENSION);
 
-        return storage_path("app/photos/{$this->id}/original.{$extension}");
+        return Storage::disk('photos')->path("{$this->id}/original.{$extension}");
+    }
+
+    public function downloadFilename(): string
+    {
+        $extension = pathinfo($this->original_filename, PATHINFO_EXTENSION);
+        $base = $this->title ? Str::slug($this->title) : pathinfo($this->original_filename, PATHINFO_FILENAME);
+
+        return "{$base}.{$extension}";
     }
 }

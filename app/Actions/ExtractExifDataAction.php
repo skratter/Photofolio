@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\Photo;
+use Carbon\Carbon;
 
 class ExtractExifDataAction
 {
@@ -12,13 +13,12 @@ class ExtractExifDataAction
      */
     public function execute(Photo $photo): void
     {
-        $path = storage_path("app/photos/{$photo->id}/original." . pathinfo($photo->original_filename, PATHINFO_EXTENSION));
-
-        $raw = @exif_read_data($path, 'ANY_TAG', true);
+        $raw = @exif_read_data($photo->originalPath(), 'ANY_TAG', true);
 
         if ($raw === false) {
             // No EXIF data present (e.g. screenshot, edited/stripped file) - not an error condition.
             $photo->update(['exif_raw' => null]);
+
             return;
         }
 
@@ -52,13 +52,13 @@ class ExtractExifDataAction
             return null;
         }
 
-        if (!str_starts_with($value, 'f/')) {
+        if (! str_starts_with($value, 'f/')) {
             return $value;
         }
 
         $number = substr($value, 2);
 
-        return 'f/' . rtrim(rtrim(number_format((float) $number, 1), '0'), '.');
+        return 'f/'.rtrim(rtrim(number_format((float) $number, 1), '0'), '.');
     }
 
     private function formatShutterSpeed(?string $fraction): ?string
@@ -71,10 +71,10 @@ class ExtractExifDataAction
         $seconds = (float) $numerator / max((float) $denominator, 1);
 
         if ($seconds >= 1) {
-            return rtrim(rtrim(number_format($seconds, 1), '0'), '.') . 's';
+            return rtrim(rtrim(number_format($seconds, 1), '0'), '.').'s';
         }
 
-        return '1/' . round(1 / $seconds);
+        return '1/'.round(1 / $seconds);
     }
 
     private function formatFocalLength(?string $fraction): ?string
@@ -86,7 +86,7 @@ class ExtractExifDataAction
         [$numerator, $denominator] = array_pad(explode('/', $fraction), 2, 1);
         $mm = (float) $numerator / max((float) $denominator, 1);
 
-        return round($mm) . 'mm';
+        return round($mm).'mm';
     }
 
     private function parseExifDate(?string $value): ?string
@@ -98,7 +98,7 @@ class ExtractExifDataAction
         // EXIF format: "2026:07:04 14:30:00"
         $normalized = preg_replace('/^(\d{4}):(\d{2}):(\d{2})/', '$1-$2-$3', $value);
 
-        return \Carbon\Carbon::parse($normalized)->toDateTimeString();
+        return Carbon::parse($normalized)->toDateTimeString();
     }
 
     private function parseGpsCoordinate(?array $coordinate, ?string $ref): ?float

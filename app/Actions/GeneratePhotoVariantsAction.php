@@ -3,14 +3,19 @@
 namespace App\Actions;
 
 use App\Models\Photo;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\ImageInterface;
 
 class GeneratePhotoVariantsAction
 {
     private const DISPLAY_MAX_EDGE = 1024;
+
     private const THUMB_MAX_EDGE = 400;
+
     private const DISPLAY_QUALITY = 80;
+
     private const THUMB_QUALITY = 75;
 
     public function execute(Photo $photo): void
@@ -19,12 +24,8 @@ class GeneratePhotoVariantsAction
         // not via "new ImageManager(...)" as in v2/v3.
         $manager = ImageManager::usingDriver(Driver::class);
 
-        $originalPath = storage_path(
-            "app/photos/{$photo->id}/original." . pathinfo($photo->original_filename, PATHINFO_EXTENSION)
-        );
-
         // v4 renamed read() to decode().
-        $image = $manager->decode($originalPath);
+        $image = $manager->decode($photo->originalPath());
 
         // Auto-orientation is applied by default in v4, but calling it explicitly
         // keeps this correct even if the global config ever disables the default.
@@ -44,7 +45,7 @@ class GeneratePhotoVariantsAction
     }
 
     private function saveVariant(
-        \Intervention\Image\Interfaces\ImageInterface $image,
+        ImageInterface $image,
         Photo $photo,
         string $name,
         int $maxEdge,
@@ -53,7 +54,7 @@ class GeneratePhotoVariantsAction
         // scaleDown respects aspect ratio and only downsizes (never upscales small originals).
         $image->scaleDown(width: $maxEdge, height: $maxEdge);
 
-        $path = storage_path("app/photos/{$photo->id}/{$name}.webp");
+        $path = Storage::disk('photos')->path("{$photo->id}/{$name}.webp");
 
         // v4 dropped toWebp(); save() infers the target format from the file extension.
         $image->save($path, quality: $quality);

@@ -11,6 +11,7 @@
             <flux:table.column>Titel</flux:table.column>
             <flux:table.column>Slug</flux:table.column>
             <flux:table.column>Sichtbarkeit</flux:table.column>
+            <flux:table.column>Fotos</flux:table.column>
             <flux:table.column>Sortierung</flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
@@ -19,7 +20,9 @@
             @foreach ($this->albums as $album)
                 <flux:table.row wire:key="album-{{ $album->id }}">
                     <flux:table.cell>
-                        {{ $album->title }}
+                        <flux:link href="{{ route('admin.albums.show', $album) }}" wire:navigate>
+                            {{ $album->title }}
+                        </flux:link>
                         @if ($album->is_homepage)
                             <flux:badge size="sm" color="blue">Startseite</flux:badge>
                         @endif
@@ -32,6 +35,7 @@
                             <flux:badge color="green" icon="globe-alt">Öffentlich</flux:badge>
                         @endif
                     </flux:table.cell>
+                    <flux:table.cell class="text-zinc-500">{{ $album->photos_count }}</flux:table.cell>
                     <flux:table.cell>{{ $album->sort_order }}</flux:table.cell>
                     <flux:table.cell>
                         <div class="flex gap-2 justify-end">

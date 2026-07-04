@@ -24,6 +24,8 @@
 <body class="antialiased">
     {{ $slot }}
 
+    <flux:toast />
+
     @livewireScripts
     @fluxScripts
 </body>

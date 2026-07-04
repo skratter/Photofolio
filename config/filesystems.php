@@ -38,6 +38,17 @@ return [
             'report' => false,
         ],
 
+        // Holds original photo uploads and generated variants (display/thumb).
+        // Deliberately separate from the "public" disk - photos must stay
+        // gated behind PhotoVariantController rather than being served
+        // directly from a public URL.
+        'photos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/photos'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
