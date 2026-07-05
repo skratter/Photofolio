@@ -123,4 +123,20 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP-Triggered Scheduler Credentials
+    |--------------------------------------------------------------------------
+    |
+    | Some shared hosting providers (e.g. all-inkl) only allow cronjobs to
+    | call a URL rather than run shell commands. These credentials protect
+    | the /cron/schedule-run endpoint via HTTP Basic Auth.
+    |
+    */
+
+    'cron' => [
+        'user' => env('CRON_USER'),
+        'password' => env('CRON_PASSWORD'),
+    ],
+
 ];
