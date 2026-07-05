@@ -2,16 +2,23 @@
 
 use App\Http\Controllers\Admin\PhotoVariantController;
 use App\Http\Controllers\ScheduleRunController;
+use App\Http\Controllers\WelcomeController;
 use App\Livewire\Admin\AlbumManager;
 use App\Livewire\Admin\AlbumShow;
+use App\Livewire\Admin\Analytics;
+use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\PhotoShow;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'pages/welcome')->name('home');
+Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('/cron/schedule-run', ScheduleRunController::class)->name('cron.schedule-run');
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', Dashboard::class)->name('dashboard');
+
+    Route::get('/analytics', Analytics::class)->name('analytics');
+
     Route::get('/albums', AlbumManager::class)->name('albums.index');
     Route::get('/albums/{album}', AlbumShow::class)->name('albums.show');
     Route::get('/albums/{album}/photos/{photo}', PhotoShow::class)->name('albums.photos.show');

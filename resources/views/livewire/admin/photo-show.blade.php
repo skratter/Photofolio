@@ -7,7 +7,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div class="overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+        <div class="self-start overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
             @if ($photo->isProcessed())
                 <img src="{{ route('admin.photos.display', $photo) }}" class="w-full">
             @else

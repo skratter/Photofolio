@@ -45,7 +45,13 @@
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             @foreach ($this->photos as $photo)
-                <div wire:key="photo-{{ $photo->id }}" class="group relative aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                <div
+                    wire:key="photo-{{ $photo->id }}"
+                    @class([
+                        'group relative aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800',
+                        'ring-2 ring-amber-400' => $album->cover_photo_id === $photo->id,
+                    ])
+                >
                     <a href="{{ route('admin.albums.photos.show', [$album, $photo]) }}" wire:navigate class="absolute inset-0">
                         @if ($photo->isProcessed())
                             <img
@@ -64,14 +70,29 @@
                         <flux:checkbox wire:model.live="selectedPhotoIds" value="{{ $photo->id }}" />
                     </label>
 
-                    <button
-                        type="button"
-                        wire:click="deletePhoto({{ $photo->id }})"
-                        wire:confirm="Foto wirklich löschen?"
-                        class="absolute right-1 top-1 z-10 flex size-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                        <flux:icon name="trash" class="size-4" />
-                    </button>
+                    <div class="absolute right-1 top-1 z-10 flex gap-1">
+                        <button
+                            type="button"
+                            wire:click="setCoverPhoto({{ $photo->id }})"
+                            title="Als Titelbild festlegen"
+                            @class([
+                                'flex size-7 items-center justify-center rounded-full bg-black/60 transition-opacity',
+                                'text-amber-400' => $album->cover_photo_id === $photo->id,
+                                'text-white opacity-0 group-hover:opacity-100' => $album->cover_photo_id !== $photo->id,
+                            ])
+                        >
+                            <flux:icon name="star" variant="{{ $album->cover_photo_id === $photo->id ? 'solid' : 'outline' }}" class="size-4" />
+                        </button>
+
+                        <button
+                            type="button"
+                            wire:click="deletePhoto({{ $photo->id }})"
+                            wire:confirm="Foto wirklich löschen?"
+                            class="flex size-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                            <flux:icon name="trash" class="size-4" />
+                        </button>
+                    </div>
                 </div>
             @endforeach
         </div>

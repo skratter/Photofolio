@@ -54,3 +54,6 @@ Thumbs.db
 boost.json
 CLAUDE.md
 AGENTS.md
+
+# Claude Code - local, machine-specific settings only
+.claude/settings.local.json

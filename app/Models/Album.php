@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use CyrildeWit\EloquentViewable\Contracts\Viewable;
+use CyrildeWit\EloquentViewable\InteractsWithViews;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
 
-class Album extends Model
+class Album extends Model implements Viewable
 {
     use HasFactory;
+    use InteractsWithViews;
 
     protected $fillable = [
         'title',
@@ -42,6 +45,11 @@ class Album extends Model
     public function coverPhoto(): BelongsTo
     {
         return $this->belongsTo(Photo::class, 'cover_photo_id');
+    }
+
+    public function effectiveCoverPhoto(): ?Photo
+    {
+        return $this->coverPhoto ?? $this->photos()->orderBy('sort_order')->first();
     }
 
     public function isPrivate(): bool

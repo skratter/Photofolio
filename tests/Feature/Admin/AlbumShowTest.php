@@ -4,6 +4,7 @@ use App\Livewire\Admin\AlbumShow;
 use App\Models\Album;
 use App\Models\Photo;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -33,6 +34,42 @@ test('authenticated users can view an album and its photos', function () {
 
     $response->assertOk();
     $response->assertSee('Sommerurlaub');
+});
+
+test('setting a cover photo updates the album', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    Livewire::actingAs($user)
+        ->test(AlbumShow::class, ['album' => $album])
+        ->call('setCoverPhoto', $photo->id);
+
+    expect($album->fresh()->cover_photo_id)->toBe($photo->id);
+});
+
+test('setting a cover photo rejects a photo from another album', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+    $otherAlbumsPhoto = Photo::factory()->for(Album::factory())->processed()->create();
+
+    expect(fn () => Livewire::actingAs($user)
+        ->test(AlbumShow::class, ['album' => $album])
+        ->call('setCoverPhoto', $otherAlbumsPhoto->id)
+    )->toThrow(ModelNotFoundException::class);
+});
+
+test('deleting the cover photo clears it from the album', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+    $album->update(['cover_photo_id' => $photo->id]);
+
+    Livewire::actingAs($user)
+        ->test(AlbumShow::class, ['album' => $album])
+        ->call('deletePhoto', $photo->id);
+
+    expect($album->fresh()->cover_photo_id)->toBeNull();
 });
 
 test('deleting a photo removes the database row and its storage directory', function () {

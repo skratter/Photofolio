@@ -21,7 +21,7 @@
     {{ $head ?? '' }}
 </head>
 
-<body class="antialiased">
+<body class="min-h-screen bg-white antialiased dark:bg-zinc-800">
     {{ $slot }}
 
     <flux:toast />

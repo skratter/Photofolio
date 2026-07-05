@@ -36,6 +36,13 @@ class AlbumShow extends Component
         unset($this->photos);
     }
 
+    public function setCoverPhoto(int $photoId): void
+    {
+        $photo = Photo::where('album_id', $this->album->id)->findOrFail($photoId);
+
+        $this->album->update(['cover_photo_id' => $photo->id]);
+    }
+
     public function deletePhoto(int $photoId): void
     {
         $photo = Photo::where('album_id', $this->album->id)->findOrFail($photoId);
