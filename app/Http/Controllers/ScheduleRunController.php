@@ -20,7 +20,11 @@ class ScheduleRunController extends Controller
             403
         );
 
-        Artisan::call('schedule:run');
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--max-time' => 50,
+            '--tries' => 3,
+        ]);
 
         return 'OK';
     }
