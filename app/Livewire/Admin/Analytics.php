@@ -20,7 +20,7 @@ class Analytics extends Component
     #[Computed]
     public function homepageViews(): array
     {
-        $page = Page::forKey('welcome');
+        $page = Page::forSlug('welcome');
 
         return [
             'total' => views($page)->count(),

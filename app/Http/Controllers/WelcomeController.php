@@ -10,7 +10,7 @@ class WelcomeController extends Controller
 {
     public function __invoke(RecordViewAction $recordView): View
     {
-        $recordView->execute(Page::forKey('welcome'));
+        $recordView->execute(Page::forSlug('welcome'));
 
         return view('pages.welcome');
     }

@@ -28,7 +28,7 @@ class Dashboard extends Component
     #[Computed]
     public function homepageViewsCount(): int
     {
-        return views(Page::forKey('welcome'))->count();
+        return views(Page::forSlug('welcome'))->count();
     }
 
     #[Computed]

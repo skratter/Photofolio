@@ -23,6 +23,14 @@
                 Alben
             </flux:sidebar.item>
             <flux:sidebar.item
+                icon="document-text"
+                href="{{ route('admin.pages.index') }}"
+                :current="request()->routeIs('admin.pages.*')"
+                wire:navigate
+            >
+                Seiten
+            </flux:sidebar.item>
+            <flux:sidebar.item
                 icon="chart-bar"
                 href="{{ route('admin.analytics') }}"
                 :current="request()->routeIs('admin.analytics')"

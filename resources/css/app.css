@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
+@import 'trix/dist/trix.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -64,3 +65,31 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Trix ships light-mode-only styles with icons baked into the SVG data URIs
+   (fill="#000"), so a CSS color override can't reach them - inverting the
+   icon is the simplest way to make them visible against a dark toolbar. */
+.dark trix-toolbar .trix-button-group {
+    border-color: var(--color-zinc-700);
+}
+
+.dark trix-toolbar .trix-button {
+    color: var(--color-zinc-100);
+    border-color: var(--color-zinc-700);
+}
+
+.dark trix-toolbar .trix-button.trix-active {
+    background: var(--color-zinc-700);
+    color: var(--color-zinc-50);
+}
+
+.dark trix-toolbar .trix-button--icon::before {
+    filter: invert(1);
+}
+
+.dark trix-editor {
+    border-color: var(--color-zinc-700);
+    color: var(--color-zinc-100);
+    /* Same bg-white/10-on-dark treatment Flux uses for its own inputs/textareas. */
+    background-color: rgb(255 255 255 / 10%);
+}

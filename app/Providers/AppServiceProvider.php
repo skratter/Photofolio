@@ -2,14 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Album;
+use App\Models\Page;
+use App\Models\PageAttachment;
+use App\Observers\AlbumObserver;
+use App\Observers\PageAttachmentObserver;
+use App\Observers\PageObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-
-use App\Models\Album;
-use App\Observers\AlbumObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Album::observe(AlbumObserver::class);
+        Page::observe(PageObserver::class);
+        PageAttachment::observe(PageAttachmentObserver::class);
     }
 
     /**
@@ -42,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Password::defaults(
-            fn(): ?Password => app()->isProduction()
+            fn (): ?Password => app()->isProduction()
             ? Password::min(12)
                 ->mixedCase()
                 ->letters()
