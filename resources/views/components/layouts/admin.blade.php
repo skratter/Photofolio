@@ -1,7 +1,7 @@
 <x-layouts.app :title="$title ?? null">
     <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.header>
-            <flux:sidebar.brand href="{{ route('admin.dashboard') }}" name="skratter.com" wire:navigate />
+            <flux:sidebar.brand href="{{ route('admin.dashboard') }}" name="{{ config('app.name') }}" wire:navigate />
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
 

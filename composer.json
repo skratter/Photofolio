@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "photofolio/photofolio",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Self-hosted photo album & portfolio manager for Laravel and Livewire, with EXIF extraction, view analytics, and a password-protected admin backend.",
     "keywords": [
         "laravel",
-        "framework"
+        "livewire",
+        "photo-gallery",
+        "portfolio"
     ],
     "license": "MIT",
     "require": {

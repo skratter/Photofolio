@@ -1,12 +1,14 @@
-# skratter.com
+# Photofolio
 
-Eine private Fotoportfolio-/Homepage-Anwendung auf Basis von Laravel und Livewire. Das Projekt verwaltet Fotoalben inklusive Upload, automatischer Bildverarbeitung und EXIF-Auswertung über ein passwortgeschütztes Admin-Backend – die öffentliche Startseite folgt später.
+Ein selbst gehosteter Foto-Album-/Portfolio-Manager auf Basis von Laravel und Livewire – universell einsetzbar für jede eigene Fotografie-Homepage, nicht an eine bestimmte Domain gebunden.
 
 ## Was ist das?
 
-skratter.com ist die Grundlage für eine persönliche Fotografie-Homepage. Statt auf einen fertigen Foto-Hoster zu setzen, verwaltet die Anwendung Alben und Bilder selbst: Fotos werden hochgeladen, im Hintergrund verarbeitet (Thumbnails, Web-optimierte Anzeigebilder, EXIF-Daten) und lassen sich anschließend in Alben organisieren. Alben können öffentlich oder passwortgeschützt (privat) sein.
+Photofolio ist die Grundlage für eine persönliche Fotografie-Homepage. Statt auf einen fertigen Foto-Hoster zu setzen, verwaltet die Anwendung Alben und Bilder selbst: Fotos werden hochgeladen, im Hintergrund verarbeitet (Thumbnails, Web-optimierte Anzeigebilder, EXIF-Daten) und lassen sich anschließend in Alben organisieren. Alben können öffentlich oder passwortgeschützt (privat) sein.
 
-Die öffentliche Startseite (`/`) ist aktuell ein Platzhalter ("soon™") mit Links zu den Social-Media-Profilen – die eigentliche Portfolio-Ansicht für Besucher ist noch nicht umgesetzt.
+Name und Branding der eigenen Instanz kommen aus `APP_NAME` (`.env`) – im Admin-Bereich und auf der Startseite wird nichts hartkodiert.
+
+Die öffentliche Startseite (`/`) ist aktuell ein Platzhalter ("soon™") mit Links zu Social-Media-Profilen – die eigentliche Portfolio-Ansicht für Besucher ist noch nicht umgesetzt. Ein Beispiel für eine laufende Instanz ist [skratter.com](https://skratter.com), die private Fotografie-Homepage des Autors.
 
 ## Funktionsumfang
 

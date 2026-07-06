@@ -1,5 +1,5 @@
 {{-- resources/views/welcome.blade.php --}}
-<x-layouts.app title="skratter.com">
+<x-layouts.app>
     <x-slot:head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </x-slot:head>
