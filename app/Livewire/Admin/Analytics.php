@@ -24,7 +24,7 @@ class Analytics extends Component
     public ?int $historyId = null;
 
     /**
-     * @return array{total: int, unique: int}
+     * @return array{id: int, total: int, unique: int}
      */
     #[Computed]
     public function homepageViews(): array
@@ -32,6 +32,7 @@ class Analytics extends Component
         $page = Page::forSlug('welcome');
 
         return [
+            'id' => $page->id,
             'total' => views($page)->count(),
             'unique' => views($page)->unique()->count(),
         ];
@@ -93,7 +94,7 @@ class Analytics extends Component
 
         return match (true) {
             $viewable instanceof Photo => $viewable->title ?: $viewable->original_filename,
-            $viewable instanceof Page => $viewable->title ?: $viewable->slug,
+            $viewable instanceof Page => $viewable->title ?: ($viewable->slug === 'welcome' ? 'Startseite' : $viewable->slug),
             $viewable instanceof Album => $viewable->title,
             default => null,
         };

@@ -1,7 +1,7 @@
 <div class="space-y-8">
     <flux:heading size="xl">Auswertung</flux:heading>
 
-    <div class="flex gap-8">
+    <div class="flex items-stretch gap-8">
         <flux:card class="flex-1">
             <flux:text>Startseite – Aufrufe</flux:text>
             <flux:heading size="xl">{{ $this->homepageViews['total'] }}</flux:heading>
@@ -9,6 +9,11 @@
         <flux:card class="flex-1">
             <flux:text>Startseite – Eindeutige Besucher</flux:text>
             <flux:heading size="xl">{{ $this->homepageViews['unique'] }}</flux:heading>
+        </flux:card>
+        <flux:card class="flex flex-1 items-center justify-center">
+            <flux:button variant="ghost" wire:click="showHistory('page', {{ $this->homepageViews['id'] }})">
+                Verlauf
+            </flux:button>
         </flux:card>
     </div>
 

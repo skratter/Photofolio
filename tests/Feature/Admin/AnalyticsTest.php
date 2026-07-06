@@ -104,3 +104,13 @@ test('opening the history modal for a page resolves its title', function () {
         ->call('showHistory', 'page', $page->id)
         ->assertSeeText('Verlauf: Über mich');
 });
+
+test('the homepage card has a history button labelled "Startseite"', function () {
+    $user = User::factory()->create();
+    $homepage = Page::forSlug('welcome');
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('showHistory', 'page', $homepage->id)
+        ->assertSeeText('Verlauf: Startseite');
+});
