@@ -66,3 +66,41 @@ test('the homepage is excluded from the pages table since it is already shown se
 
     expect($component->get('pages')->pluck('id'))->not->toContain($homepage->id);
 });
+
+test('opening the history modal for an album shows its view history and origins', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create(['title' => 'Urlaub']);
+
+    app()->instance('request', Request::create('/', 'GET', server: ['HTTP_REFERER' => 'https://www.google.com/']));
+    views($album)->record();
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('showHistory', 'album', $album->id)
+        ->assertSet('showHistoryModal', true)
+        ->assertSeeText('Urlaub')
+        ->assertSeeText('Letzte 7 Tage')
+        ->assertSeeText('Insgesamt: 1 Aufrufe')
+        ->assertSeeText('www.google.com');
+});
+
+test('opening the history modal for a photo resolves its title', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->create(['title' => 'Sonnenuntergang']);
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('showHistory', 'photo', $photo->id)
+        ->assertSeeText('Verlauf: Sonnenuntergang');
+});
+
+test('opening the history modal for a page resolves its title', function () {
+    $user = User::factory()->create();
+    $page = Page::factory()->create(['title' => 'Über mich']);
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('showHistory', 'page', $page->id)
+        ->assertSeeText('Verlauf: Über mich');
+});

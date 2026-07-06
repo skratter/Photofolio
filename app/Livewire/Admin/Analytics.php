@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\BuildViewHistoryAction;
+use App\Actions\BuildViewOriginsAction;
 use App\Models\Album;
 use App\Models\Page;
 use App\Models\Photo;
+use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -14,6 +17,12 @@ use Livewire\Component;
 #[Layout('layouts.admin')]
 class Analytics extends Component
 {
+    public bool $showHistoryModal = false;
+
+    public ?string $historyType = null;
+
+    public ?int $historyId = null;
+
     /**
      * @return array{total: int, unique: int}
      */
@@ -58,6 +67,58 @@ class Analytics extends Component
             ->withViewsCount(unique: true, as: 'unique_views_count')
             ->limit(20)
             ->get();
+    }
+
+    public function showHistory(string $type, int $id): void
+    {
+        $this->historyType = $type;
+        $this->historyId = $id;
+        $this->showHistoryModal = true;
+    }
+
+    #[Computed]
+    public function historyViewable(): ?Viewable
+    {
+        return match ($this->historyType) {
+            'album' => Album::find($this->historyId),
+            'photo' => Photo::find($this->historyId),
+            'page' => Page::find($this->historyId),
+            default => null,
+        };
+    }
+
+    public function historyLabel(): ?string
+    {
+        $viewable = $this->historyViewable();
+
+        return match (true) {
+            $viewable instanceof Photo => $viewable->title ?: $viewable->original_filename,
+            $viewable instanceof Page => $viewable->title ?: $viewable->slug,
+            $viewable instanceof Album => $viewable->title,
+            default => null,
+        };
+    }
+
+    /**
+     * @return ?array{daily: \Illuminate\Support\Collection<int, array{label: string, count: int}>, monthly: \Illuminate\Support\Collection<int, array{label: string, count: int}>, yearly: \Illuminate\Support\Collection<int, array{label: string, count: int}>, total: int}
+     */
+    #[Computed]
+    public function history(): ?array
+    {
+        $viewable = $this->historyViewable();
+
+        return $viewable ? (new BuildViewHistoryAction)->execute($viewable) : null;
+    }
+
+    /**
+     * @return ?array{referrers: \Illuminate\Support\Collection<int, array{label: string, count: int}>, userAgents: \Illuminate\Support\Collection<int, array{label: string, count: int}>}
+     */
+    #[Computed]
+    public function origins(): ?array
+    {
+        $viewable = $this->historyViewable();
+
+        return $viewable ? (new BuildViewOriginsAction)->execute($viewable) : null;
     }
 
     public function render(): View
