@@ -101,6 +101,9 @@ class ExtractExifDataAction
         return Carbon::parse($normalized)->toDateTimeString();
     }
 
+    /**
+     * @param  array<int, string>|null  $coordinate
+     */
     private function parseGpsCoordinate(?array $coordinate, ?string $ref): ?float
     {
         if ($coordinate === null || count($coordinate) !== 3) {

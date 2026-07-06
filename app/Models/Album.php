@@ -4,6 +4,7 @@ namespace App\Models;
 
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\InteractsWithViews;
+use Database\Factories\AlbumFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,9 @@ use Illuminate\Support\Facades\Hash;
 
 class Album extends Model implements Viewable
 {
+    /** @use HasFactory<AlbumFactory> */
     use HasFactory;
+
     use InteractsWithViews;
 
     protected $fillable = [
@@ -37,11 +40,17 @@ class Album extends Model implements Viewable
         ];
     }
 
+    /**
+     * @return HasMany<Photo, $this>
+     */
     public function photos(): HasMany
     {
         return $this->hasMany(Photo::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return BelongsTo<Photo, $this>
+     */
     public function coverPhoto(): BelongsTo
     {
         return $this->belongsTo(Photo::class, 'cover_photo_id');

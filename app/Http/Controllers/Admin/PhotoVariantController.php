@@ -15,6 +15,7 @@ class PhotoVariantController extends Controller
         $path = match ($variant) {
             'thumb' => $photo->thumbPath(),
             'display' => $photo->displayPath(),
+            default => abort(404),
         };
 
         abort_unless(is_file($path), 404);

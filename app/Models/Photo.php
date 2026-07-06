@@ -4,6 +4,7 @@ namespace App\Models;
 
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\InteractsWithViews;
+use Database\Factories\PhotoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,9 @@ use Illuminate\Support\Str;
 
 class Photo extends Model implements Viewable
 {
+    /** @use HasFactory<PhotoFactory> */
     use HasFactory;
+
     use InteractsWithViews;
 
     protected $fillable = [
@@ -57,11 +60,17 @@ class Photo extends Model implements Viewable
         ];
     }
 
+    /**
+     * @return BelongsTo<Album, $this>
+     */
     public function album(): BelongsTo
     {
         return $this->belongsTo(Album::class);
     }
 
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);

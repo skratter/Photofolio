@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Album;
 use App\Models\Page;
 use App\Models\Photo;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -42,7 +43,7 @@ class Dashboard extends Component
         return Photo::with('album')->orderByViews()->first();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.dashboard');
     }

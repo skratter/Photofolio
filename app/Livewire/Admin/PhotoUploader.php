@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Jobs\ProcessUploadedPhoto;
 use App\Models\Album;
 use App\Models\Photo;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -64,7 +65,7 @@ class PhotoUploader extends Component
         ProcessUploadedPhoto::dispatch($photo);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.photo-uploader');
     }

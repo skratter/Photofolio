@@ -6,6 +6,7 @@ use App\Livewire\Forms\PhotoForm;
 use App\Models\Album;
 use App\Models\Photo;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -32,7 +33,7 @@ class PhotoShow extends Component
         Flux::toast(text: 'Foto gespeichert.', variant: 'success');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.photo-show');
     }

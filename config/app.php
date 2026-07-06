@@ -139,4 +139,20 @@ return [
         'password' => env('CRON_PASSWORD'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin User Seeding
+    |--------------------------------------------------------------------------
+    |
+    | Credentials used by database\seeders\AdminUserSeeder to create the
+    | initial admin account.
+    |
+    */
+
+    'admin' => [
+        'email' => env('ADMIN_EMAIL'),
+        'name' => env('ADMIN_NAME'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];

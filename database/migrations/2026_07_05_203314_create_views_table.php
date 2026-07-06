@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\Schema;
 
 class CreateViewsTable extends Migration
@@ -9,7 +10,7 @@ class CreateViewsTable extends Migration
     /**
      * The database schema.
      *
-     * @var Schema
+     * @var Builder
      */
     protected $schema;
 

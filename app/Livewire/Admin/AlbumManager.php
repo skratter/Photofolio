@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Livewire\Forms\AlbumForm;
 use App\Models\Album;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -19,8 +20,11 @@ class AlbumManager extends Component
 
     public ?int $confirmingDeleteId = null;
 
+    /**
+     * @return Collection<int, Album>
+     */
     #[Computed]
-    public function albums()
+    public function albums(): Collection
     {
         return Album::withCount('photos')->orderBy('sort_order')->orderBy('title')->get();
     }

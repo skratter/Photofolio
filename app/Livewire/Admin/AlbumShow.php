@@ -5,13 +5,19 @@ namespace App\Livewire\Admin;
 use App\Actions\BuildPhotoZipAction;
 use App\Models\Album;
 use App\Models\Photo;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * @property-read Collection<int, Photo> $photos
+ */
 #[Layout('layouts.admin')]
 class AlbumShow extends Component
 {
@@ -24,8 +30,11 @@ class AlbumShow extends Component
 
     public string $bulkRenameBaseName = '';
 
+    /**
+     * @return Collection<int, Photo>
+     */
     #[Computed]
-    public function photos()
+    public function photos(): Collection
     {
         return $this->album->photos()->orderBy('sort_order')->get();
     }
@@ -105,7 +114,7 @@ class AlbumShow extends Component
         unset($this->photos);
     }
 
-    public function download(BuildPhotoZipAction $buildZip)
+    public function download(BuildPhotoZipAction $buildZip): BinaryFileResponse
     {
         $photos = Photo::where('album_id', $this->album->id)
             ->whereIn('id', $this->selectedPhotoIds)
@@ -125,7 +134,7 @@ class AlbumShow extends Component
         return response()->download($zipPath, Str::slug($this->album->title).'.zip')->deleteFileAfterSend();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.album-show');
     }
