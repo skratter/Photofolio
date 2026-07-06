@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\PhotoVariantController;
+use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\ScheduleRunController;
+use App\Http\Controllers\SecurityTxtController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WelcomeController;
 use App\Livewire\Admin\AlbumManager;
 use App\Livewire\Admin\AlbumShow;
@@ -11,6 +14,10 @@ use App\Livewire\Admin\PhotoShow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomeController::class)->name('home');
+
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsTxtController::class)->name('robots');
+Route::get('/.well-known/security.txt', SecurityTxtController::class)->name('security-txt');
 
 Route::get('/cron/schedule-run', ScheduleRunController::class)->name('cron.schedule-run');
 
