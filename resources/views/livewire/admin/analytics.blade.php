@@ -73,4 +73,30 @@
             </flux:table.rows>
         </flux:table>
     </div>
+
+    <div>
+        <flux:heading size="lg" class="mb-4">Meistgesehene Seiten</flux:heading>
+
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>Titel</flux:table.column>
+                <flux:table.column>Aufrufe</flux:table.column>
+                <flux:table.column>Eindeutige Besucher</flux:table.column>
+            </flux:table.columns>
+
+            <flux:table.rows>
+                @forelse ($this->pages as $page)
+                    <flux:table.row wire:key="page-{{ $page->id }}">
+                        <flux:table.cell>{{ $page->title ?: $page->slug }}</flux:table.cell>
+                        <flux:table.cell>{{ $page->views_count }}</flux:table.cell>
+                        <flux:table.cell class="text-zinc-500">{{ $page->unique_views_count }}</flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row>
+                        <flux:table.cell colspan="3" class="text-zinc-500">Noch keine Aufrufe erfasst.</flux:table.cell>
+                    </flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
 </div>

@@ -46,6 +46,20 @@ class Analytics extends Component
         return Photo::with('album')->orderByViews()->withViewsCount(unique: true, as: 'unique_views_count')->limit(20)->get();
     }
 
+    /**
+     * @return Collection<int, Page>
+     */
+    #[Computed]
+    public function pages(): Collection
+    {
+        // Excludes the homepage, which already gets its own cards above.
+        return Page::where('slug', '!=', 'welcome')
+            ->orderByViews()
+            ->withViewsCount(unique: true, as: 'unique_views_count')
+            ->limit(20)
+            ->get();
+    }
+
     public function render(): View
     {
         return view('livewire.admin.analytics');

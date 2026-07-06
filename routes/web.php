@@ -13,9 +13,12 @@ use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\PageManager;
 use App\Livewire\Admin\PhotoShow;
+use App\Livewire\PageShow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomeController::class)->name('home');
+
+Route::get('/seite/{page:slug}', PageShow::class)->name('pages.show');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsTxtController::class)->name('robots');

@@ -93,3 +93,37 @@ select:focus[data-flux-control] {
     /* Same bg-white/10-on-dark treatment Flux uses for its own inputs/textareas. */
     background-color: rgb(255 255 255 / 10%);
 }
+
+/* Minimal styling for rendered page content (Trix output), mirroring what
+   the editor's toolbar can produce: headings, quote, code, lists, indent. */
+.page-content h1 {
+    @apply mt-8 mb-4 text-2xl font-bold;
+}
+
+.page-content h2 {
+    @apply mt-6 mb-3 text-xl font-bold;
+}
+
+.page-content p {
+    @apply mb-4;
+}
+
+.page-content a {
+    @apply underline;
+}
+
+.page-content blockquote {
+    @apply my-4 border-l-4 border-zinc-300 pl-4 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400;
+}
+
+.page-content pre {
+    @apply my-4 overflow-x-auto rounded-lg bg-zinc-100 p-4 font-mono text-sm dark:bg-zinc-900;
+}
+
+.page-content ul {
+    @apply mb-4 list-disc pl-6;
+}
+
+.page-content ol {
+    @apply mb-4 list-decimal pl-6;
+}

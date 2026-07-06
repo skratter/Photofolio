@@ -56,6 +56,11 @@ class Page extends Model implements Viewable
         return $this->type !== 'legal';
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
+    }
+
     /**
      * @param  Builder<Page>  $query
      */
