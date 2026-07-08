@@ -112,7 +112,7 @@ class Analytics extends Component
     }
 
     /**
-     * @return ?array{referrers: \Illuminate\Support\Collection<int, array{label: string, count: int}>, userAgents: \Illuminate\Support\Collection<int, array{label: string, count: int}>}
+     * @return ?array{referrers: \Illuminate\Support\Collection<int, array{label: string, count: int, isOwn: bool}>, userAgents: \Illuminate\Support\Collection<int, array{label: string, count: int}>, ownDomainsTotal: int, total: int}
      */
     #[Computed]
     public function origins(): ?array

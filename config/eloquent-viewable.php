@@ -74,8 +74,12 @@ return [
     | If you want to honor the DNT header, you can specify that here. We won't
     | record views from visitors with the Do Not Track header.
     |
+    | Note: this package looks up the header under the wrong key ("HTTP_DNT"
+    | instead of "DNT") so this setting never actually takes effect. DNT is
+    | honored for real in App\Actions\RecordViewAction instead.
+    |
     */
-    'honor_dnt' => false,
+    'honor_dnt' => true,
 
     /*
     |--------------------------------------------------------------------------

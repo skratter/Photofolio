@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class BuildViewOriginsAction
 {
     /**
-     * @return array{referrers: Collection<int, array{label: string, count: int}>, userAgents: Collection<int, array{label: string, count: int}>}
+     * @return array{referrers: Collection<int, array{label: string, count: int, isOwn: bool}>, userAgents: Collection<int, array{label: string, count: int}>, ownDomainsTotal: int, total: int}
      */
     public function execute(Viewable $viewable): array
     {
@@ -18,16 +18,24 @@ class BuildViewOriginsAction
             ->where('viewable_id', $viewable->getKey())
             ->get(['referrer', 'user_agent']);
 
-        $referrers = $views
-            ->map(function (View $view) {
-                $referrer = $view->getAttribute('referrer');
+        /** @var list<string> $ownDomains */
+        $ownDomains = config('analytics.own_domains', []);
 
-                return $this->referrerLabel(is_string($referrer) ? $referrer : null);
-            })
+        $referrerLabels = $views->map(function (View $view) {
+            $referrer = $view->getAttribute('referrer');
+
+            return $this->referrerLabel(is_string($referrer) ? $referrer : null);
+        });
+
+        $referrers = $referrerLabels
             ->countBy()
             ->sortDesc()
             ->take(10)
-            ->map(fn (int $count, string $label) => ['label' => $label, 'count' => $count])
+            ->map(fn (int $count, string $label) => [
+                'label' => $label,
+                'count' => $count,
+                'isOwn' => in_array($label, $ownDomains, true),
+            ])
             ->values();
 
         $userAgents = $views
@@ -45,6 +53,8 @@ class BuildViewOriginsAction
         return [
             'referrers' => $referrers,
             'userAgents' => $userAgents,
+            'ownDomainsTotal' => $referrerLabels->filter(fn (string $label) => in_array($label, $ownDomains, true))->count(),
+            'total' => $views->count(),
         ];
     }
 

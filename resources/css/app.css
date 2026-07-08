@@ -94,6 +94,14 @@ select:focus[data-flux-control] {
     background-color: rgb(255 255 255 / 10%);
 }
 
+/* Trix only styles headings in already-saved content shown via the
+   ".trix-content" class - never in the live editor itself, so a heading
+   otherwise looks identical to plain text while composing. Targets <h2>
+   since heading1 is remapped to that tag above. */
+trix-editor h2 {
+    @apply text-xl font-bold;
+}
+
 /* Minimal styling for rendered page content (Trix output), mirroring what
    the editor's toolbar can produce: headings, quote, code, lists, indent. */
 .page-content h1 {

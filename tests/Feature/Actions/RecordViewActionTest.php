@@ -32,3 +32,14 @@ test('it does not record a view for a known crawler', function () {
 
     expect(views($photo)->count())->toBe(0);
 });
+
+test('it does not record a view for a visitor sending the Do Not Track header', function () {
+    app()->instance('request', Request::create('/', 'GET', server: [
+        'HTTP_DNT' => '1',
+    ]));
+    $photo = Photo::factory()->create();
+
+    (new RecordViewAction)->execute($photo);
+
+    expect(views($photo)->count())->toBe(0);
+});

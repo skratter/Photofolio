@@ -42,3 +42,19 @@ test('it only counts views belonging to the given viewable', function () {
     expect($origins['referrers'])->toHaveCount(1)
         ->and($origins['referrers']->first()['label'])->toBe('example.com');
 });
+
+test('it flags referrers that match a configured own domain', function () {
+    config(['analytics.own_domains' => ['skratter.com']]);
+    $photo = Photo::factory()->create();
+
+    View::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'referrer' => 'https://skratter.com/']);
+    View::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'referrer' => 'https://skratter.com/']);
+    View::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'referrer' => 'https://example.com']);
+
+    $origins = (new BuildViewOriginsAction)->execute($photo);
+
+    expect($origins['referrers']->firstWhere('label', 'skratter.com')['isOwn'])->toBeTrue()
+        ->and($origins['referrers']->firstWhere('label', 'example.com')['isOwn'])->toBeFalse()
+        ->and($origins['ownDomainsTotal'])->toBe(2)
+        ->and($origins['total'])->toBe(3);
+});
