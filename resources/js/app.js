@@ -18,6 +18,83 @@ document.addEventListener('alpine:init', () => {
             this.index = (this.index - 1 + this.photos.length) % this.photos.length;
         },
     }));
+
+    // Livewire uploads every file bound to the same wire:model property in
+    // ONE combined request - which runs straight into PHP's max_file_uploads
+    // (20 by default) once more than 20 files are selected at once, with no
+    // indication of which files made it in and which didn't. This splits the
+    // selection into small batches and uploads them one at a time through a
+    // hidden input that only this component ever touches, tracking each
+    // file's status as its batch comes back from the server.
+    Alpine.data('photoUploader', () => ({
+        BATCH_SIZE: 15,
+        queue: [],
+        batches: [],
+        batchIndex: 0,
+        isDraggingOver: false,
+        isUploading: false,
+        progress: 0,
+
+        get total() {
+            return this.queue.length;
+        },
+        get finished() {
+            return this.queue.filter((file) => file.status === 'fertig' || file.status === 'fehler').length;
+        },
+
+        handleFiles(fileList) {
+            const files = Array.from(fileList);
+
+            if (files.length === 0) {
+                return;
+            }
+
+            this.queue = files.map((file) => ({ name: file.name, status: 'wartend' }));
+            this.batches = [];
+
+            for (let i = 0; i < files.length; i += this.BATCH_SIZE) {
+                this.batches.push(files.slice(i, i + this.BATCH_SIZE));
+            }
+
+            this.batchIndex = 0;
+            this.uploadNextBatch();
+        },
+
+        uploadNextBatch() {
+            if (this.batchIndex >= this.batches.length) {
+                return;
+            }
+
+            const batch = this.batches[this.batchIndex];
+
+            batch.forEach((file) => {
+                const entry = this.queue.find((queued) => queued.name === file.name && queued.status === 'wartend');
+
+                if (entry) {
+                    entry.status = 'laedt';
+                }
+            });
+
+            const dataTransfer = new DataTransfer();
+            batch.forEach((file) => dataTransfer.items.add(file));
+
+            this.$refs.uploader.files = dataTransfer.files;
+            this.$refs.uploader.dispatchEvent(new Event('change'));
+        },
+
+        handleBatchUploaded(results) {
+            results.forEach(({ name, status }) => {
+                const entry = this.queue.find((queued) => queued.name === name && queued.status === 'laedt');
+
+                if (entry) {
+                    entry.status = status === 'done' ? 'fertig' : 'fehler';
+                }
+            });
+
+            this.batchIndex++;
+            this.uploadNextBatch();
+        },
+    }));
 });
 
 document.addEventListener('trix-before-initialize', () => {

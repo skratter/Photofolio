@@ -6,7 +6,7 @@ use App\Jobs\ProcessUploadedPhoto;
 use App\Models\Album;
 use App\Models\Photo;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Validate;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -18,19 +18,41 @@ class PhotoUploader extends Component
     public Album $album;
 
     /** @var array<int, TemporaryUploadedFile> */
-    #[Validate(['photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:20480'])]
     public array $photos = [];
 
+    /**
+     * Validates and stores each file individually instead of the whole batch
+     * at once - the JS side already sends files in small batches (to stay
+     * under PHP's max_file_uploads per request), and a single bad file
+     * shouldn't hide the outcome of every other file in the same batch. The
+     * per-file results are reported back to the browser so the upload list
+     * can show which files actually made it in.
+     */
     public function updatedPhotos(): void
     {
-        $this->validate();
+        $results = [];
 
         foreach ($this->photos as $file) {
+            $name = $file->getClientOriginalName();
+
+            $validator = Validator::make(
+                ['photo' => $file],
+                ['photo' => 'image|mimes:jpg,jpeg,png,webp|max:20480'],
+            );
+
+            if ($validator->fails()) {
+                $results[] = ['name' => $name, 'status' => 'error'];
+
+                continue;
+            }
+
             $this->storePhoto($file);
+            $results[] = ['name' => $name, 'status' => 'done'];
         }
 
         $this->photos = [];
         $this->dispatch('photos-uploaded');
+        $this->dispatch('batch-uploaded', results: $results);
     }
 
     private function storePhoto(TemporaryUploadedFile $file): void

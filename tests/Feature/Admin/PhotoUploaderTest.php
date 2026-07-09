@@ -51,7 +51,31 @@ test('rejects non-image uploads', function () {
     Livewire::actingAs($user)
         ->test(PhotoUploader::class, ['album' => $album])
         ->set('photos', [UploadedFile::fake()->create('document.pdf', 10)])
-        ->assertHasErrors(['photos.0']);
+        ->assertDispatched('batch-uploaded', function (string $name, array $params) {
+            return $params['results'] === [['name' => 'document.pdf', 'status' => 'error']];
+        });
 
     expect(Photo::where('album_id', $album->id)->count())->toBe(0);
+});
+
+test('stores valid photos and reports errors for invalid ones in the same batch', function () {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(PhotoUploader::class, ['album' => $album])
+        ->set('photos', [
+            UploadedFile::fake()->image('good.jpg'),
+            UploadedFile::fake()->create('bad.pdf', 10),
+        ])
+        ->assertDispatched('batch-uploaded', function (string $name, array $params) {
+            return $params['results'] === [
+                ['name' => 'good.jpg', 'status' => 'done'],
+                ['name' => 'bad.pdf', 'status' => 'error'],
+            ];
+        });
+
+    expect(Photo::where('album_id', $album->id)->count())->toBe(1);
 });
