@@ -18,6 +18,7 @@ return [
         'skratter.com',
         'www.skratter.com',
         'skratter.net',
+        'skratter.de',
         'www.skratter.net',
         'familie-wolf.berlin',
         'www.familie-wolf.berlin',

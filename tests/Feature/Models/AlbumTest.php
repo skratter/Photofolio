@@ -25,3 +25,22 @@ test('effective cover photo is null when the album has no photos', function () {
 
     expect($album->effectiveCoverPhoto())->toBeNull();
 });
+
+test('a public album is always accessible', function () {
+    $album = Album::factory()->create();
+
+    expect($album->isAccessible())->toBeTrue();
+});
+
+test('a private album is not accessible without an unlocked session', function () {
+    $album = Album::factory()->private()->create();
+
+    expect($album->isAccessible())->toBeFalse();
+});
+
+test('a private album is accessible once unlocked in session', function () {
+    $album = Album::factory()->private()->create();
+    session()->put($album->unlockSessionKey(), true);
+
+    expect($album->isAccessible())->toBeTrue();
+});

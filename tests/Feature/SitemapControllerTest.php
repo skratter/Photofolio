@@ -13,18 +13,7 @@ test('it includes the homepage', function () {
         ->assertSee(url('/'), false);
 });
 
-test('it does not include public albums while no public album route exists', function () {
-    Album::factory()->create(['visibility' => 'public', 'slug' => 'urlaub']);
-
-    $response = $this->get(route('sitemap'));
-
-    $response->assertOk()->assertDontSee('urlaub');
-});
-
-test('it includes public albums once a public album route exists', function () {
-    Route::get('/albums/{slug}', fn () => '')->name('albums.show');
-    Route::getRoutes()->refreshNameLookups();
-
+test('it includes public albums but not private ones', function () {
     $public = Album::factory()->create(['visibility' => 'public', 'slug' => 'urlaub']);
     $private = Album::factory()->create(['visibility' => 'private', 'slug' => 'privat']);
 

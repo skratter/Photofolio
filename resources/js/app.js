@@ -1,6 +1,25 @@
 import Trix from 'trix';
 import { marked } from 'marked';
 
+document.addEventListener('alpine:init', () => {
+    Alpine.data('photoMasonry', (photos) => ({
+        index: null,
+        photos,
+        open(i) {
+            this.index = i;
+        },
+        close() {
+            this.index = null;
+        },
+        next() {
+            this.index = (this.index + 1) % this.photos.length;
+        },
+        prev() {
+            this.index = (this.index - 1 + this.photos.length) % this.photos.length;
+        },
+    }));
+});
+
 document.addEventListener('trix-before-initialize', () => {
     // Only one heading level ships by default - map it to <h2> since <h1> is
     // reserved for the page title itself.

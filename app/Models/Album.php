@@ -66,6 +66,16 @@ class Album extends Model implements Viewable
         return $this->visibility === 'private';
     }
 
+    public function isAccessible(): bool
+    {
+        return ! $this->isPrivate() || session()->get($this->unlockSessionKey(), false) === true;
+    }
+
+    public function unlockSessionKey(): string
+    {
+        return "unlocked-album-{$this->id}";
+    }
+
     public function setPassword(string $plainPassword): void
     {
         $this->password_hash = Hash::make($plainPassword);

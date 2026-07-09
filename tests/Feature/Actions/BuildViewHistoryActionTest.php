@@ -6,6 +6,9 @@ use CyrildeWit\EloquentViewable\View;
 use Illuminate\Support\Carbon;
 
 test('it buckets views into daily, monthly, yearly and total', function () {
+    // Month labels are locale-dependent ("Juni" vs "June") - pinned explicitly
+    // so this test doesn't silently depend on the environment's app.locale.
+    app()->setLocale('de');
     Carbon::setTestNow(Carbon::create(2026, 7, 6, 12, 0, 0));
     $photo = Photo::factory()->create();
 

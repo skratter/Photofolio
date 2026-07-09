@@ -8,7 +8,7 @@ Photofolio ist die Grundlage für eine persönliche Fotografie-Homepage. Statt a
 
 Name und Branding der eigenen Instanz kommen aus `APP_NAME` (`.env`) – im Admin-Bereich und auf der Startseite wird nichts hartkodiert.
 
-Die öffentliche Startseite (`/`) ist aktuell ein Platzhalter ("soon™") mit Links zu Social-Media-Profilen – die eigentliche Portfolio-Ansicht für Besucher ist noch nicht umgesetzt. Ein Beispiel für eine laufende Instanz ist [skratter.com](https://skratter.com), die private Fotografie-Homepage des Autors.
+Besucher sehen Alben-Übersicht, Album-Ansicht (Masonry-Grid mit Lightbox/Diashow) und Foto-Detailseiten (großes Bild, EXIF-Daten) unter `/alben`, `/album/{slug}` bzw. `/album/{slug}/{photo}`. Die Startseite (`/`) zeigt wahlweise ein als Startseite markiertes Album als Masonry-Grid oder – falls keins gesetzt ist – einen Platzhalter. Private Alben sind passwortgeschützt und tauchen nicht in der öffentlichen Übersicht auf. Frei angelegte und rechtliche Seiten (Impressum, Datenschutz, etc.) haben eine öffentliche Anzeige unter `/seite/{slug}`. Header/Footer bieten Navigation, Rechtliches und einen Hell/Dunkel/System-Umschalter. Ein Beispiel für eine laufende Instanz ist [skratter.com](https://skratter.com), die private Fotografie-Homepage des Autors.
 
 ## Funktionsumfang
 
@@ -22,8 +22,13 @@ Die öffentliche Startseite (`/`) ist aktuell ein Platzhalter ("soon™") mit Li
     - Generierung von Bildvarianten (Thumbnail & Anzeigegröße als WebP) via Intervention Image
   - **Fotoverwaltung im Album**: Mehrfachauswahl, Massen-Umbenennung, Einzel- und Massen-Löschung
   - **Download**: einzelnes Originalbild oder mehrere Fotos gesammelt als ZIP
-  - **Auswertung**: Aufrufzahlen pro Album/Foto/Startseite, ohne Bot- und Admin-Traffic – Details in [docs/analytics.md](docs/analytics.md)
-- **Bildauslieferung**: eigene Routen für Thumbnail- und Anzeigevarianten, nur für verarbeitete Fotos, mit Caching-Header
+  - **Seiten verwalten (CMS)**: Impressum & Datenschutz als geschützte, nicht löschbare „Legal“-Seiten, dazu beliebig viele freie Seiten (Titel, Slug, Meta-Description, Entwurf/Veröffentlicht, Navigations-Sichtbarkeit, Sortierung). WYSIWYG-Editor (Trix) mit eingebetteten Bildern und separaten Datei-Downloads; eingefügter Markdown-Text (z. B. KI-generierte Entwürfe) wird beim Einfügen automatisch in echte Formatierung umgewandelt. Verwaiste Entwürfe, Anhänge und aus dem Text entfernte Bilder werden automatisch aufgeräumt
+  - **Auswertung**: Aufrufzahlen pro Album/Foto/Seite/Startseite, ohne Bot-, Admin- und Do-Not-Track-Traffic, dazu Verlauf (täglich/monatlich/jährlich/gesamt) und Herkunfts-Analyse (Referrer, User-Agent, Kennzeichnung eigener Domains) – Details in [docs/analytics.md](docs/analytics.md)
+- **Öffentliche Album-/Foto-Galerie**: Album-Übersicht (`/alben`), Album-Ansicht mit Masonry-Grid und Diashow-Lightbox (`/album/{slug}`), Foto-Detailseite mit EXIF (`/album/{slug}/{photo}`); private Alben zeigen ein Passwort-Formular statt der Fotos
+- **Startseite** (`/`): zeigt das als Startseite markierte Album, sonst einen Platzhalter
+- **Öffentliche Seiten-Anzeige** (`/seite/{slug}`): rendert veröffentlichte CMS-Seiten inkl. Downloads-Liste; automatisch in der Sitemap enthalten
+- **Navigation & Footer**: Header mit Alben-Link und frei konfigurierbaren CMS-Seiten, Footer mit Impressum/Datenschutz und Hell/Dunkel/System-Umschalter (folgt automatisch der Browser-Präferenz)
+- **Bildauslieferung**: eigene Routen für Thumbnail- und Anzeigevarianten (Admin- und öffentlich, mit Zugriffsprüfung für private Alben), nur für verarbeitete Fotos, mit Caching-Header
 - **Cron-per-HTTP**: Endpunkt (`/cron/schedule-run`, HTTP-Basic-Auth) stößt `queue:work` an – gedacht für Hosting-Umgebungen ohne dauerhaft laufenden Worker-Prozess, Details in [docs/deployment.md](docs/deployment.md)
 
 ## Dokumentation
@@ -42,6 +47,8 @@ Für Beiträge/Konventionen siehe [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Livewire 4** mit **Flux UI** (Komponentenbibliothek) für reaktive Admin-Oberflächen
 - **Laravel Fortify** für Authentifizierung
 - **Intervention Image** für Bildverarbeitung
+- **Trix** als WYSIWYG-Editor für Seiteninhalte, **marked** wandelt eingefügten Markdown-Text in Trix in echtes HTML um
+- **cyrildewit/eloquent-viewable** für die eigene, Drittanbieter-freie Aufruf-Statistik
 - **Tailwind CSS 4** + **Vite** für das Frontend-Build
 - **Pest** für Tests, **Pint** für Code-Formatierung, **Larastan** für statische Analyse
 
@@ -80,4 +87,4 @@ php artisan test --compact
 
 ## Status
 
-Das Projekt befindet sich in aktiver Entwicklung. Der Admin-Bereich zur Album- und Fotoverwaltung ist funktionsfähig, die öffentliche Portfolio-Ansicht steht noch aus.
+Das Projekt befindet sich in aktiver Entwicklung. Admin-Bereich sowie öffentlicher Auftritt (Alben, Fotos, Startseite, Seiten, Navigation/Footer) sind funktionsfähig. Noch offen: Profilseite (lässt sich bereits jetzt als normale CMS-Seite anlegen) und ein Blog.

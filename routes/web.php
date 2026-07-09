@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\PageAttachmentController;
 use App\Http\Controllers\Admin\PhotoVariantController;
+use App\Http\Controllers\PhotoVariantController as PublicPhotoVariantController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\ScheduleRunController;
 use App\Http\Controllers\SecurityTxtController;
@@ -13,12 +14,26 @@ use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\PageManager;
 use App\Livewire\Admin\PhotoShow;
+use App\Livewire\AlbumIndex;
+use App\Livewire\AlbumShow as PublicAlbumShow;
 use App\Livewire\PageShow;
+use App\Livewire\PhotoShow as PublicPhotoShow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('/seite/{page:slug}', PageShow::class)->name('pages.show');
+
+Route::get('/alben', AlbumIndex::class)->name('albums.index');
+Route::get('/album/{album:slug}', PublicAlbumShow::class)->name('albums.show');
+Route::get('/album/{album:slug}/{photo}', PublicPhotoShow::class)->name('albums.photos.show');
+
+Route::get('/album/{album:slug}/{photo}/thumb', PublicPhotoVariantController::class)
+    ->defaults('variant', 'thumb')
+    ->name('albums.photos.thumb');
+Route::get('/album/{album:slug}/{photo}/display', PublicPhotoVariantController::class)
+    ->defaults('variant', 'display')
+    ->name('albums.photos.display');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsTxtController::class)->name('robots');

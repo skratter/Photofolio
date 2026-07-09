@@ -5,6 +5,7 @@ namespace App\Models;
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\InteractsWithViews;
 use Database\Factories\PhotoFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -79,6 +80,14 @@ class Photo extends Model implements Viewable
     public function isProcessed(): bool
     {
         return $this->processed_at !== null;
+    }
+
+    /**
+     * @param  Builder<Photo>  $query
+     */
+    public function scopeProcessed(Builder $query): void
+    {
+        $query->whereNotNull('processed_at');
     }
 
     public function hasCoordinates(): bool
