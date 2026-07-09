@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\Album;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -30,6 +31,8 @@ class AlbumForm extends Form
     #[Validate('required|integer|min:0')]
     public int $sort_order = 0;
 
+    public bool $is_homepage = false;
+
     public function setAlbum(Album $album): void
     {
         $this->album = $album;
@@ -39,6 +42,7 @@ class AlbumForm extends Form
         $this->visibility = $album->visibility;
         $this->sort_order = $album->sort_order;
         $this->password = '';
+        $this->is_homepage = $album->is_homepage;
     }
 
     public function generateSlugFromTitle(): void
@@ -61,6 +65,7 @@ class AlbumForm extends Form
             'description' => $this->description ?: null,
             'visibility' => $this->visibility,
             'sort_order' => $this->sort_order,
+            'is_homepage' => $this->visibility === 'public' && $this->is_homepage,
         ]);
 
         if ($this->visibility === 'private' && $this->password !== '') {
@@ -82,6 +87,7 @@ class AlbumForm extends Form
             'description' => $this->description ?: null,
             'visibility' => $this->visibility,
             'sort_order' => $this->sort_order,
+            'is_homepage' => $this->visibility === 'public' && $this->is_homepage,
         ]);
 
         // Only touch the password if a new one was actually entered.
@@ -119,7 +125,7 @@ class AlbumForm extends Form
 
         if (($isNewPrivateAlbum || $isExistingAlbumSwitchingToPrivateWithoutPassword) && $this->password === '') {
             $this->addError('password', 'Ein Passwort ist für private Alben erforderlich.');
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'password' => 'Ein Passwort ist für private Alben erforderlich.',
             ]);
         }

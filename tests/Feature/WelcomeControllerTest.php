@@ -31,6 +31,15 @@ test('it shows the homepage album\'s photos when one is set', function () {
     $response->assertOk()->assertDontSeeText('soon');
 });
 
+test('it does not show a private album even if it is marked as the homepage', function () {
+    $album = Album::factory()->private()->create(['title' => 'Geheimalbum', 'is_homepage' => true]);
+    Photo::factory()->for($album)->processed()->create();
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertDontSeeText('Geheimalbum')->assertSeeText('soon');
+});
+
 test('it records a view for a guest visitor', function () {
     $this->get('/');
 

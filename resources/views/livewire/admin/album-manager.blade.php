@@ -101,6 +101,14 @@
                 <flux:error name="form.sort_order" />
             </flux:field>
 
+            @if ($form->visibility === 'public')
+                <flux:field variant="inline">
+                    <flux:checkbox wire:model="form.is_homepage" />
+                    <flux:label>Als Startseite verwenden</flux:label>
+                    <flux:description>Zeigt dieses Album statt des Platzhaltertexts auf der Startseite. Nur ein Album kann gleichzeitig als Startseite markiert sein - eine andere Markierung wird automatisch entfernt.</flux:description>
+                </flux:field>
+            @endif
+
             <div class="flex justify-end gap-2">
                 <flux:button variant="ghost" type="button" wire:click="$set('showModal', false)">
                     Abbrechen

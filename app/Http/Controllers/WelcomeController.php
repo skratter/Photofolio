@@ -13,7 +13,9 @@ class WelcomeController extends Controller
     {
         $recordView->execute(Page::forSlug('welcome'));
 
-        $homepageAlbum = Album::where('is_homepage', true)->first();
+        // Guards against a private album ever being shown here unprotected -
+        // the homepage has no password gate of its own, unlike /album/{slug}.
+        $homepageAlbum = Album::where('is_homepage', true)->where('visibility', 'public')->first();
 
         return view('pages.welcome', [
             'homepageAlbum' => $homepageAlbum,
