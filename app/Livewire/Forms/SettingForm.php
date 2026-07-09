@@ -32,6 +32,21 @@ class SettingForm extends Form
     #[Validate('nullable|url|max:255')]
     public string $social_linkedin_url = '';
 
+    #[Validate('nullable|url|max:255')]
+    public string $social_facebook_url = '';
+
+    #[Validate('nullable|url|max:255')]
+    public string $social_flickr_url = '';
+
+    #[Validate('nullable|url|max:255')]
+    public string $social_x_url = '';
+
+    #[Validate('nullable|url|max:255')]
+    public string $social_youtube_url = '';
+
+    #[Validate('nullable|url|max:255')]
+    public string $social_pinterest_url = '';
+
     #[Validate('nullable|string|max:2000')]
     public string $analytics_own_domains = '';
 
@@ -45,6 +60,11 @@ class SettingForm extends Form
         $this->masonry_columns = $setting->masonry_columns;
         $this->social_instagram_url = $setting->social_instagram_url ?? '';
         $this->social_linkedin_url = $setting->social_linkedin_url ?? '';
+        $this->social_facebook_url = $setting->social_facebook_url ?? '';
+        $this->social_flickr_url = $setting->social_flickr_url ?? '';
+        $this->social_x_url = $setting->social_x_url ?? '';
+        $this->social_youtube_url = $setting->social_youtube_url ?? '';
+        $this->social_pinterest_url = $setting->social_pinterest_url ?? '';
         $this->analytics_own_domains = $setting->analytics_own_domains ?? '';
     }
 
@@ -61,6 +81,11 @@ class SettingForm extends Form
             'masonry_columns' => $this->masonry_columns,
             'social_instagram_url' => $this->social_instagram_url ?: null,
             'social_linkedin_url' => $this->social_linkedin_url ?: null,
+            'social_facebook_url' => $this->social_facebook_url ?: null,
+            'social_flickr_url' => $this->social_flickr_url ?: null,
+            'social_x_url' => $this->social_x_url ?: null,
+            'social_youtube_url' => $this->social_youtube_url ?: null,
+            'social_pinterest_url' => $this->social_pinterest_url ?: null,
             'analytics_own_domains' => $this->analytics_own_domains ?: null,
         ]);
 

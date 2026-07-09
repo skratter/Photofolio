@@ -33,6 +33,11 @@ test('it updates the settings', function () {
         ->set('form.masonry_columns', 4)
         ->set('form.social_instagram_url', 'https://www.instagram.com/example/')
         ->set('form.social_linkedin_url', 'https://www.linkedin.com/in/example/')
+        ->set('form.social_facebook_url', 'https://www.facebook.com/example/')
+        ->set('form.social_flickr_url', 'https://www.flickr.com/photos/example/')
+        ->set('form.social_x_url', 'https://x.com/example/')
+        ->set('form.social_youtube_url', 'https://www.youtube.com/@example/')
+        ->set('form.social_pinterest_url', 'https://www.pinterest.com/example/')
         ->set('form.analytics_own_domains', "example.com\nwww.example.com")
         ->call('save')
         ->assertHasNoErrors();
@@ -47,6 +52,11 @@ test('it updates the settings', function () {
         ->and($setting->masonry_columns)->toBe(4)
         ->and($setting->social_instagram_url)->toBe('https://www.instagram.com/example/')
         ->and($setting->social_linkedin_url)->toBe('https://www.linkedin.com/in/example/')
+        ->and($setting->social_facebook_url)->toBe('https://www.facebook.com/example/')
+        ->and($setting->social_flickr_url)->toBe('https://www.flickr.com/photos/example/')
+        ->and($setting->social_x_url)->toBe('https://x.com/example/')
+        ->and($setting->social_youtube_url)->toBe('https://www.youtube.com/@example/')
+        ->and($setting->social_pinterest_url)->toBe('https://www.pinterest.com/example/')
         ->and($setting->ownDomainsList())->toBe(['example.com', 'www.example.com']);
 });
 

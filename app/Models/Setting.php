@@ -16,6 +16,11 @@ class Setting extends Model
         'album_photos_per_page',
         'social_instagram_url',
         'social_linkedin_url',
+        'social_facebook_url',
+        'social_flickr_url',
+        'social_x_url',
+        'social_youtube_url',
+        'social_pinterest_url',
         'analytics_own_domains',
         'masonry_columns',
     ];

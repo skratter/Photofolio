@@ -59,6 +59,41 @@
         </flux:field>
 
         <flux:field>
+            <flux:label>Facebook-Link</flux:label>
+            <flux:input type="url" wire:model="form.social_facebook_url" placeholder="https://www.facebook.com/dein-profil" />
+            <flux:description>Leer lassen, um das Icon in der Kopfzeile auszublenden.</flux:description>
+            <flux:error name="form.social_facebook_url" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>Flickr-Link</flux:label>
+            <flux:input type="url" wire:model="form.social_flickr_url" placeholder="https://www.flickr.com/photos/dein-profil" />
+            <flux:description>Leer lassen, um das Icon in der Kopfzeile auszublenden.</flux:description>
+            <flux:error name="form.social_flickr_url" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>X-Link</flux:label>
+            <flux:input type="url" wire:model="form.social_x_url" placeholder="https://x.com/dein-profil" />
+            <flux:description>Leer lassen, um das Icon in der Kopfzeile auszublenden.</flux:description>
+            <flux:error name="form.social_x_url" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>YouTube-Link</flux:label>
+            <flux:input type="url" wire:model="form.social_youtube_url" placeholder="https://www.youtube.com/@dein-kanal" />
+            <flux:description>Leer lassen, um das Icon in der Kopfzeile auszublenden.</flux:description>
+            <flux:error name="form.social_youtube_url" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>Pinterest-Link</flux:label>
+            <flux:input type="url" wire:model="form.social_pinterest_url" placeholder="https://www.pinterest.com/dein-profil" />
+            <flux:description>Leer lassen, um das Icon in der Kopfzeile auszublenden.</flux:description>
+            <flux:error name="form.social_pinterest_url" />
+        </flux:field>
+
+        <flux:field>
             <flux:label>Eigene Domains (Auswertung)</flux:label>
             <flux:textarea wire:model="form.analytics_own_domains" rows="4" placeholder="eine-domain.de&#10;www.eine-domain.de" />
             <flux:description>Eine Domain pro Zeile. Referrer, die hierauf passen, werden in der Auswertung als „eigene Domain" markiert statt als externe Verlinkung gewertet.</flux:description>

@@ -25,17 +25,45 @@ test('it shows the configured site name in the header and placeholder', function
     $response->assertOk()->assertSeeText('Meine Fotoseite');
 });
 
+test('it shows a copyright notice with the current year and site name', function () {
+    Setting::current()->update(['site_name' => 'Meine Fotoseite']);
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSeeText('© '.now()->year.' Meine Fotoseite. Alle Rechte vorbehalten.');
+});
+
 test('it only shows social links that are configured', function () {
     Setting::current()->update([
         'social_instagram_url' => 'https://www.instagram.com/example/',
         'social_linkedin_url' => null,
+        'social_facebook_url' => 'https://www.facebook.com/example/',
+        'social_flickr_url' => null,
+        'social_x_url' => null,
+        'social_youtube_url' => null,
+        'social_pinterest_url' => null,
     ]);
 
     $response = $this->get('/');
 
     $response->assertOk()
         ->assertSee('https://www.instagram.com/example/', false)
-        ->assertDontSee('linkedin.com');
+        ->assertSee('https://www.facebook.com/example/', false)
+        ->assertDontSee('linkedin.com')
+        ->assertDontSee('flickr.com')
+        ->assertDontSee('youtube.com')
+        ->assertDontSee('pinterest.com');
+});
+
+test('social links are hidden by default until configured', function () {
+    $response = $this->get('/');
+
+    $response->assertOk()
+        ->assertDontSee('facebook.com')
+        ->assertDontSee('flickr.com')
+        ->assertDontSee('x.com')
+        ->assertDontSee('youtube.com')
+        ->assertDontSee('pinterest.com');
 });
 
 test('it shows the placeholder when no album is marked as the homepage', function () {
