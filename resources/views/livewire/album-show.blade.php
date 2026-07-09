@@ -20,6 +20,31 @@
     @elseif ($this->photos->isEmpty())
         <flux:text class="text-zinc-500">Noch keine Fotos in diesem Album.</flux:text>
     @else
-        <x-photo-masonry :album="$album" :photos="$this->photos" />
+        {{-- wire:key ties the whole grid to the current page, so switching
+             pages tears down and rebuilds the Alpine component fresh with
+             that page's photos, instead of trying to patch its existing
+             state in place (which is what the previous "load more" approach
+             did via a hand-rolled event, and which never quite worked
+             reliably). --}}
+        <x-photo-masonry :album="$album" :photos="$this->photos" wire:key="masonry-page-{{ $this->page }}" />
+
+        @if ($this->totalPages > 1)
+            <div class="mt-10 flex items-center justify-center gap-2">
+                <flux:button size="sm" wire:click="goToPage({{ $this->page - 1 }})" :disabled="$this->page <= 1">
+                    « Zurück
+                </flux:button>
+
+                @for ($page = 1; $page <= $this->totalPages; $page++)
+                    <flux:button size="sm" wire:click="goToPage({{ $page }})"
+                        :variant="$page === $this->page ? 'primary' : 'ghost'">
+                        {{ $page }}
+                    </flux:button>
+                @endfor
+
+                <flux:button size="sm" wire:click="goToPage({{ $this->page + 1 }})" :disabled="$this->page >= $this->totalPages">
+                    Weiter »
+                </flux:button>
+            </div>
+        @endif
     @endif
 </div>

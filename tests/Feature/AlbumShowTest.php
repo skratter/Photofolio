@@ -99,3 +99,44 @@ test('it does not record a view for an authenticated user', function () {
 
     expect(views($album)->count())->toBe(0);
 });
+
+test('it shows only the first page of photos and pagination controls for larger albums', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->count(45)->create();
+
+    $component = Livewire::test(AlbumShow::class, ['album' => $album])
+        ->assertSeeHtml('wire:click="goToPage(2)"');
+
+    expect($component->instance()->photos)->toHaveCount(30);
+});
+
+test('an album that fits on one page shows no pagination controls', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->count(10)->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->assertDontSeeHtml('wire:click="goToPage(2)"');
+});
+
+test('jumping to a page shows that page\'s photos', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->count(45)->create();
+
+    $component = Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('goToPage', 2);
+
+    expect($component->instance()->photos)->toHaveCount(15);
+});
+
+test('jumping to an out-of-range page clamps to the nearest valid page', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->count(45)->create();
+
+    $component = Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('goToPage', 99)
+        ->assertSet('page', 2);
+
+    expect($component->instance()->photos)->toHaveCount(15);
+
+    $component->call('goToPage', 0)->assertSet('page', 1);
+});

@@ -2,7 +2,7 @@
 <x-layouts.public>
     @if ($homepageAlbum)
         <div class="mx-auto max-w-5xl px-6 pt-8 pb-16">
-            <x-photo-masonry :album="$homepageAlbum" :photos="$homepagePhotos" />
+            <x-photo-masonry :album="$homepageAlbum" :photos="$homepagePhotos" :pool="$homepagePhotoPool" :rotate-seconds="8" />
         </div>
     @else
         <div class="flex items-center justify-center px-6 py-24">

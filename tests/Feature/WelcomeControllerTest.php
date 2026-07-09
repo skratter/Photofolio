@@ -31,6 +31,31 @@ test('it shows the homepage album\'s photos when one is set', function () {
     $response->assertOk()->assertDontSeeText('soon');
 });
 
+test('it shows at most 12 random photos from a larger homepage album, with the rest as a rotation pool', function () {
+    $album = Album::factory()->create(['is_homepage' => true]);
+    Photo::factory()->for($album)->processed()->count(58)->create();
+
+    $response = $this->get('/');
+    $data = $response->original->getData();
+
+    expect($data['homepagePhotos'])->toHaveCount(12)
+        ->and($data['homepagePhotoPool'])->toHaveCount(46);
+});
+
+test('the random photo selection actually varies between requests', function () {
+    // The photos() relation orders by sort_order by default - inRandomOrder()
+    // appending RAND() as a mere tiebreaker after that (instead of replacing
+    // it) would silently make every request return the exact same order,
+    // which is the regression this guards against.
+    $album = Album::factory()->create(['is_homepage' => true]);
+    Photo::factory()->for($album)->processed()->count(50)->sequence(fn ($sequence) => ['sort_order' => $sequence->index])->create();
+
+    $first = $this->get('/')->original->getData()['homepagePhotos']->pluck('id')->all();
+    $second = $this->get('/')->original->getData()['homepagePhotos']->pluck('id')->all();
+
+    expect($first)->not->toBe($second);
+});
+
 test('it does not show a private album even if it is marked as the homepage', function () {
     $album = Album::factory()->private()->create(['title' => 'Geheimalbum', 'is_homepage' => true]);
     Photo::factory()->for($album)->processed()->create();

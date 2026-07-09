@@ -2,20 +2,169 @@ import Trix from 'trix';
 import { marked } from 'marked';
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('photoMasonry', (photos) => ({
+    Alpine.data('photoMasonry', (photos, pool = [], rotateSeconds = null) => ({
         index: null,
         photos,
+        pool,
+        laidOut: false,
+        autoplayTimer: null,
+
+        init() {
+            this.$nextTick(() => this.layoutMasonry());
+
+            // Only the homepage passes a pool + interval - regular album
+            // pages show every photo and never rotate.
+            if (!rotateSeconds || this.pool.length === 0) {
+                return;
+            }
+
+            setInterval(() => this.rotateOne(), rotateSeconds * 1000);
+        },
+
         open(i) {
             this.index = i;
         },
         close() {
             this.index = null;
+            this.stopAutoplay();
         },
         next() {
             this.index = (this.index + 1) % this.photos.length;
         },
         prev() {
             this.index = (this.index - 1 + this.photos.length) % this.photos.length;
+        },
+
+        get isAutoplaying() {
+            return this.autoplayTimer !== null;
+        },
+
+        toggleAutoplay() {
+            if (this.isAutoplaying) {
+                this.stopAutoplay();
+
+                return;
+            }
+
+            this.autoplayTimer = setInterval(() => this.next(), 3000);
+        },
+
+        stopAutoplay() {
+            clearInterval(this.autoplayTimer);
+            this.autoplayTimer = null;
+        },
+
+        // CSS columns (the previous approach) fills one column top-to-bottom
+        // before starting the next, so the bottom edge ends up ragged - one
+        // column can easily run noticeably longer than the others. This
+        // instead does a real shortest-column-first placement: each photo
+        // goes into whichever column is currently shortest, using the known
+        // width/height to compute sizes without waiting for images to load.
+        // Positions items absolutely, so it also has to size/place them all
+        // itself instead of relying on normal document flow.
+        layoutMasonry() {
+            const container = this.$refs.grid;
+
+            // A zero width means the container isn't actually laid out yet
+            // (e.g. still hidden, or this ran before its own CSS applied) -
+            // computing positions from that would poison every column height
+            // with an invalid number. Retry next frame instead of leaving
+            // the grid stuck uninitialized until something else (a resize)
+            // happens to trigger a proper run.
+            if (!container) {
+                return;
+            }
+
+            if (container.offsetWidth === 0) {
+                requestAnimationFrame(() => this.layoutMasonry());
+
+                return;
+            }
+
+            const gap = 16;
+            const columns = window.innerWidth >= 640 ? 3 : 2;
+            const columnWidth = (container.offsetWidth - gap * (columns - 1)) / columns;
+            const columnHeights = new Array(columns).fill(0);
+            const lastItemPerColumn = new Array(columns).fill(null);
+
+            this.photos.forEach((photo, i) => {
+                const item = container.querySelector(`[data-slot="${i}"]`);
+
+                // A missing/zero width or height would make itemHeight NaN -
+                // and once one column's height is NaN, "find the shortest
+                // column" (comparing against NaN) can never resolve again,
+                // silently collapsing every remaining photo onto the same
+                // spot. Skip that one tile instead of corrupting the rest.
+                if (!item || !photo.width || !photo.height) {
+                    return;
+                }
+
+                const column = columnHeights.indexOf(Math.min(...columnHeights));
+                const top = columnHeights[column];
+                const itemHeight = columnWidth / (photo.width / photo.height);
+
+                item.style.width = `${columnWidth}px`;
+                item.style.height = `${itemHeight}px`;
+                item.style.left = `${column * (columnWidth + gap)}px`;
+                item.style.top = `${top}px`;
+
+                columnHeights[column] += itemHeight + gap;
+                lastItemPerColumn[column] = { item, top, height: itemHeight };
+            });
+
+            this.laidOut = true;
+
+            // With only a handful of photos per column, they rarely add up to
+            // exactly the same height - stretching the last tile in every
+            // shorter column down to the tallest column's bottom edge
+            // (object-cover just crops a little more of that one photo)
+            // makes the grid finish flush instead of leaving a ragged gap.
+            const bottom = Math.max(0, ...columnHeights) - gap;
+
+            lastItemPerColumn.forEach((last) => {
+                if (last) {
+                    last.item.style.height = `${bottom - last.top}px`;
+                }
+            });
+
+            container.style.height = `${bottom}px`;
+        },
+
+        // Fades one random visible photo out, swaps it for a random one from
+        // the pool that isn't currently shown, then fades the new one in and
+        // relayouts (the incoming photo's aspect ratio may differ from the
+        // outgoing one's, so later items in that column may need to shift).
+        rotateOne() {
+            if (this.pool.length === 0) {
+                return;
+            }
+
+            const slot = Math.floor(Math.random() * this.photos.length);
+            const img = this.$el.querySelector(`[data-slot="${slot}"] img`);
+
+            if (!img) {
+                return;
+            }
+
+            img.classList.remove('opacity-100');
+            img.classList.add('opacity-0');
+
+            setTimeout(() => {
+                const poolIndex = Math.floor(Math.random() * this.pool.length);
+                const incoming = this.pool.splice(poolIndex, 1)[0];
+                const outgoing = this.photos[slot];
+
+                this.pool.push(outgoing);
+                this.photos[slot] = incoming;
+                this.layoutMasonry();
+
+                img.alt = incoming.title ?? '';
+                img.onload = () => {
+                    img.classList.remove('opacity-0');
+                    img.classList.add('opacity-100');
+                };
+                img.src = incoming.thumb;
+            }, 700); // matches the CSS transition-opacity duration on the <img>
         },
     }));
 

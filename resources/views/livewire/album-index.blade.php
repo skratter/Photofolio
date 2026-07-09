@@ -6,12 +6,15 @@
     @else
         <div class="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3">
             @foreach ($this->albums as $album)
-                <a href="{{ Route::has('albums.show') ? route('albums.show', $album->slug) : '#' }}" wire:navigate class="group block">
+                <a href="{{ Route::has('albums.show') ? route('albums.show', $album->slug) : '#' }}" wire:navigate
+                    x-data="{ loaded: false }" class="group block">
                     <div class="aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
                         @php $cover = $album->effectiveCoverPhoto(); @endphp
                         @if ($cover?->isProcessed())
                             <img src="{{ route('albums.photos.thumb', [$album, $cover]) }}" alt=""
-                                class="size-full object-cover transition duration-300 group-hover:scale-105">
+                                x-init="if ($el.complete) loaded = true" x-on:load="loaded = true"
+                                x-bind:class="loaded ? 'opacity-100' : 'opacity-0'"
+                                class="size-full object-cover transition duration-500 group-hover:scale-105">
                         @endif
                     </div>
                     <div class="mt-2">

@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -17,9 +18,14 @@ use Livewire\Component;
 #[Layout('layouts.public')]
 class AlbumShow extends Component
 {
+    private const PER_PAGE = 30;
+
     public Album $album;
 
     public string $password = '';
+
+    #[Url(as: 'seite')]
+    public int $page = 1;
 
     public function mount(): void
     {
@@ -42,6 +48,12 @@ class AlbumShow extends Component
         app(RecordViewAction::class)->execute($this->album);
     }
 
+    public function goToPage(int $page): void
+    {
+        $this->page = max(1, min($page, $this->totalPages()));
+        unset($this->photos);
+    }
+
     /**
      * @return Collection<int, Photo>
      */
@@ -52,7 +64,22 @@ class AlbumShow extends Component
             return new Collection;
         }
 
-        return $this->album->photos()->processed()->orderBy('sort_order')->get();
+        return $this->album->photos()->processed()
+            ->orderBy('sort_order')
+            ->forPage($this->page, self::PER_PAGE)
+            ->get();
+    }
+
+    #[Computed]
+    public function totalPhotoCount(): int
+    {
+        return $this->album->isAccessible() ? $this->album->photos()->processed()->count() : 0;
+    }
+
+    #[Computed]
+    public function totalPages(): int
+    {
+        return (int) max(1, ceil($this->totalPhotoCount() / self::PER_PAGE));
     }
 
     public function render(): View
