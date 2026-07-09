@@ -5,7 +5,9 @@ use App\Models\Album;
 use App\Models\Page;
 use App\Models\Photo;
 use App\Models\User;
+use CyrildeWit\EloquentViewable\View as ViewRecord;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
 test('guests are redirected to login', function () {
@@ -113,4 +115,59 @@ test('the homepage card has a history button labelled "Startseite"', function ()
         ->test(Analytics::class)
         ->call('showHistory', 'page', $homepage->id)
         ->assertSeeText('Verlauf: Startseite');
+});
+
+test('confirmReset opens the confirmation modal for the chosen period', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('confirmReset', 'week')
+        ->assertSet('confirmingResetPeriod', 'week');
+});
+
+test('resetting "today" only deletes views from today', function () {
+    $user = User::factory()->create();
+    $photo = Photo::factory()->create();
+
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()]);
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()->subDays(2)]);
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('confirmReset', 'day')
+        ->call('resetStatistics')
+        ->assertSet('confirmingResetPeriod', null);
+
+    expect(views($photo)->count())->toBe(1);
+});
+
+test('resetting "last 7 days" deletes views within that window but keeps older ones', function () {
+    $user = User::factory()->create();
+    $photo = Photo::factory()->create();
+
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()->subDays(3)]);
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()->subDays(10)]);
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('confirmReset', 'week')
+        ->call('resetStatistics');
+
+    expect(views($photo)->count())->toBe(1);
+});
+
+test('resetting "all" deletes every recorded view', function () {
+    $user = User::factory()->create();
+    $photo = Photo::factory()->create();
+
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()]);
+    ViewRecord::create(['viewable_id' => $photo->id, 'viewable_type' => $photo->getMorphClass(), 'viewed_at' => Carbon::now()->subYear()]);
+
+    Livewire::actingAs($user)
+        ->test(Analytics::class)
+        ->call('confirmReset', 'all')
+        ->call('resetStatistics');
+
+    expect(views($photo)->count())->toBe(0);
 });

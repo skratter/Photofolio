@@ -12,9 +12,11 @@
 
     $photosData = $photos->map($mapPhoto)->values();
     $poolData = ($pool ?? collect())->map($mapPhoto)->values();
+    $settings = \App\Models\Setting::current();
 @endphp
 
-<div {{ $attributes }} x-data="photoMasonry(@js($photosData), @js($poolData), {{ $rotateSeconds ?? 'null' }})"
+<div {{ $attributes }}
+    x-data="photoMasonry(@js($photosData), @js($poolData), {{ $rotateSeconds ?? 'null' }}, {{ $settings->slideshow_autoplay_seconds }}, {{ $settings->masonry_columns }})"
     x-on:resize.window.debounce.200ms="layoutMasonry()" class="relative">
     {{-- CSS columns/waterfall always leaves a ragged bottom edge, since it
          fills one column fully before starting the next. This computes a

@@ -129,6 +129,40 @@
         </flux:table>
     </div>
 
+    <div class="border-t border-zinc-200 pt-8 dark:border-zinc-700">
+        <flux:heading size="lg" class="mb-1">Statistik zurücksetzen</flux:heading>
+        <flux:text class="mb-4 text-zinc-500">
+            Löscht aufgezeichnete Aufrufe unwiderruflich – für alle Alben, Fotos und Seiten zusammen.
+        </flux:text>
+        <div class="flex flex-wrap gap-2">
+            <flux:button size="sm" variant="danger" wire:click="confirmReset('day')">Heute zurücksetzen</flux:button>
+            <flux:button size="sm" variant="danger" wire:click="confirmReset('week')">Letzte 7 Tage zurücksetzen</flux:button>
+            <flux:button size="sm" variant="danger" wire:click="confirmReset('month')">Letzte 30 Tage zurücksetzen</flux:button>
+            <flux:button size="sm" variant="danger" wire:click="confirmReset('all')">Alles zurücksetzen</flux:button>
+        </div>
+    </div>
+
+    <flux:modal wire:model="confirmingResetPeriod" name="confirm-reset" class="max-w-sm">
+        <div class="space-y-4">
+            <flux:heading size="lg">Statistik wirklich zurücksetzen?</flux:heading>
+            <flux:text>
+                @if ($confirmingResetPeriod === 'day')
+                    Alle heute aufgezeichneten Aufrufe werden unwiderruflich gelöscht.
+                @elseif ($confirmingResetPeriod === 'week')
+                    Alle Aufrufe der letzten 7 Tage werden unwiderruflich gelöscht.
+                @elseif ($confirmingResetPeriod === 'month')
+                    Alle Aufrufe der letzten 30 Tage werden unwiderruflich gelöscht.
+                @else
+                    Die komplette Aufruf-Historie wird unwiderruflich gelöscht.
+                @endif
+            </flux:text>
+            <div class="flex justify-end gap-2">
+                <flux:button variant="ghost" wire:click="$set('confirmingResetPeriod', null)">Abbrechen</flux:button>
+                <flux:button variant="danger" wire:click="resetStatistics">Zurücksetzen</flux:button>
+            </div>
+        </div>
+    </flux:modal>
+
     <flux:modal wire:model="showHistoryModal" name="view-history" class="max-w-2xl">
         <div class="space-y-6">
             <flux:heading size="lg">Verlauf: {{ $this->historyLabel() }}</flux:heading>

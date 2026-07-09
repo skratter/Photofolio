@@ -14,6 +14,7 @@ use App\Livewire\Admin\Analytics;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\PageManager;
 use App\Livewire\Admin\PhotoShow;
+use App\Livewire\Admin\SettingsManager;
 use App\Livewire\AlbumIndex;
 use App\Livewire\AlbumShow as PublicAlbumShow;
 use App\Livewire\PageShow;
@@ -45,6 +46,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/', Dashboard::class)->name('dashboard');
 
     Route::get('/analytics', Analytics::class)->name('analytics');
+    Route::get('/settings', SettingsManager::class)->name('settings');
 
     Route::get('/pages', PageManager::class)->name('pages.index');
     Route::post('/pages/attachments', [PageAttachmentController::class, 'store'])->name('pages.attachments.store');

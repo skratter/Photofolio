@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Album;
 use App\Models\Page;
 use App\Models\PageAttachment;
+use App\Models\Setting;
 use App\Observers\AlbumObserver;
 use App\Observers\PageAttachmentObserver;
 use App\Observers\PageObserver;
@@ -43,8 +44,19 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'navigationPages' => Page::inNavigation()->orderBy('sort_order')->get(),
                 'legalPages' => Page::query()->where('type', 'legal')->published()->get(),
+                'siteSettings' => Setting::current(),
             ]);
         });
+
+        // Same two-name situation as above - components.layouts.{app,admin}
+        // for the <x-layouts.*> tags, layouts.{app,admin} for Livewire's
+        // #[Layout(...)] attribute.
+        View::composer(
+            ['components.layouts.app', 'layouts.app', 'components.layouts.admin', 'layouts.admin'],
+            function ($view): void {
+                $view->with('siteSettings', Setting::current());
+            }
+        );
     }
 
     /**

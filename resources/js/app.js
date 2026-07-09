@@ -2,7 +2,7 @@ import Trix from 'trix';
 import { marked } from 'marked';
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('photoMasonry', (photos, pool = [], rotateSeconds = null) => ({
+    Alpine.data('photoMasonry', (photos, pool = [], rotateSeconds = null, autoplaySeconds = 3, desktopColumns = 3) => ({
         index: null,
         photos,
         pool,
@@ -46,7 +46,7 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            this.autoplayTimer = setInterval(() => this.next(), 3000);
+            this.autoplayTimer = setInterval(() => this.next(), autoplaySeconds * 1000);
         },
 
         stopAutoplay() {
@@ -82,7 +82,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             const gap = 16;
-            const columns = window.innerWidth >= 640 ? 3 : 2;
+            const columns = window.innerWidth >= 640 ? desktopColumns : Math.min(2, desktopColumns);
             const columnWidth = (container.offsetWidth - gap * (columns - 1)) / columns;
             const columnHeights = new Array(columns).fill(0);
             const lastItemPerColumn = new Array(columns).fill(null);

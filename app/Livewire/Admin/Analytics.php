@@ -8,6 +8,8 @@ use App\Models\Album;
 use App\Models\Page;
 use App\Models\Photo;
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
+use CyrildeWit\EloquentViewable\View as ViewRecord;
+use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -22,6 +24,9 @@ class Analytics extends Component
     public ?string $historyType = null;
 
     public ?int $historyId = null;
+
+    /** @var 'day'|'week'|'month'|'all'|null */
+    public ?string $confirmingResetPeriod = null;
 
     /**
      * @return array{id: int, total: int, unique: int}
@@ -120,6 +125,38 @@ class Analytics extends Component
         $viewable = $this->historyViewable();
 
         return $viewable ? (new BuildViewOriginsAction)->execute($viewable) : null;
+    }
+
+    /**
+     * @param  'day'|'week'|'month'|'all'  $period
+     */
+    public function confirmReset(string $period): void
+    {
+        $this->confirmingResetPeriod = $period;
+    }
+
+    public function resetStatistics(): void
+    {
+        $query = ViewRecord::query();
+
+        $cutoff = match ($this->confirmingResetPeriod) {
+            'day' => now()->startOfDay(),
+            'week' => now()->subDays(7),
+            'month' => now()->subDays(30),
+            default => null,
+        };
+
+        if ($cutoff !== null) {
+            $query->where('viewed_at', '>=', $cutoff);
+        }
+
+        $deleted = $query->delete();
+
+        $this->confirmingResetPeriod = null;
+
+        unset($this->homepageViews, $this->albums, $this->photos, $this->pages, $this->history, $this->origins);
+
+        Flux::toast(text: "{$deleted} Aufrufe gelöscht.", variant: 'success');
     }
 
     public function render(): View

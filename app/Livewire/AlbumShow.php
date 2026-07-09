@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\RecordViewAction;
 use App\Models\Album;
 use App\Models\Photo;
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -18,8 +19,6 @@ use Livewire\Component;
 #[Layout('layouts.public')]
 class AlbumShow extends Component
 {
-    private const PER_PAGE = 30;
-
     public Album $album;
 
     public string $password = '';
@@ -66,7 +65,7 @@ class AlbumShow extends Component
 
         return $this->album->photos()->processed()
             ->orderBy('sort_order')
-            ->forPage($this->page, self::PER_PAGE)
+            ->forPage($this->page, Setting::current()->album_photos_per_page)
             ->get();
     }
 
@@ -79,7 +78,7 @@ class AlbumShow extends Component
     #[Computed]
     public function totalPages(): int
     {
-        return (int) max(1, ceil($this->totalPhotoCount() / self::PER_PAGE));
+        return (int) max(1, ceil($this->totalPhotoCount() / Setting::current()->album_photos_per_page));
     }
 
     public function render(): View

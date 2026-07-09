@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Models\Setting;
 use CyrildeWit\EloquentViewable\Contracts\Viewable;
 use CyrildeWit\EloquentViewable\View;
 use Illuminate\Support\Collection;
@@ -18,8 +19,7 @@ class BuildViewOriginsAction
             ->where('viewable_id', $viewable->getKey())
             ->get(['referrer', 'user_agent']);
 
-        /** @var list<string> $ownDomains */
-        $ownDomains = config('analytics.own_domains', []);
+        $ownDomains = Setting::current()->ownDomainsList();
 
         $referrerLabels = $views->map(function (View $view) {
             $referrer = $view->getAttribute('referrer');

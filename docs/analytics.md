@@ -55,7 +55,7 @@ Drittanbieter, rein serverseitig über [`cyrildewit/eloquent-viewable`](https://
   - **Herkunft** (`BuildViewOriginsAction`): Top-10-Referrer (auf Host reduziert, z. B.
     „google.com“) und Top-10 User-Agent-Strings. Hilfreich, um Bot-/Scraper-Traffic zu erkennen, den
     CrawlerDetect nicht als solchen einstuft (z. B. auffällig viele Aufrufe ganz ohne User-Agent).
-    Referrer, die in `config/analytics.php` (`own_domains`) als eigene Domain hinterlegt sind (z. B.
+    Referrer, die unter **Admin → Einstellungen** als eigene Domain hinterlegt sind (z. B.
     alte/alias-Domains, die hierher weiterleiten), werden farblich markiert, damit sie nicht
     fälschlich als externe Verlinkung gewertet werden.
 

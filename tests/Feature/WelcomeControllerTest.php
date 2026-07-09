@@ -3,6 +3,7 @@
 use App\Models\Album;
 use App\Models\Page;
 use App\Models\Photo;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,27 @@ test('it renders the welcome page', function () {
     $response = $this->get('/');
 
     $response->assertOk();
+});
+
+test('it shows the configured site name in the header and placeholder', function () {
+    Setting::current()->update(['site_name' => 'Meine Fotoseite']);
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSeeText('Meine Fotoseite');
+});
+
+test('it only shows social links that are configured', function () {
+    Setting::current()->update([
+        'social_instagram_url' => 'https://www.instagram.com/example/',
+        'social_linkedin_url' => null,
+    ]);
+
+    $response = $this->get('/');
+
+    $response->assertOk()
+        ->assertSee('https://www.instagram.com/example/', false)
+        ->assertDontSee('linkedin.com');
 });
 
 test('it shows the placeholder when no album is marked as the homepage', function () {

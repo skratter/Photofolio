@@ -5,22 +5,16 @@ namespace App\Http\Controllers;
 use App\Actions\RecordViewAction;
 use App\Models\Album;
 use App\Models\Page;
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 
 class WelcomeController extends Controller
 {
-    /**
-     * Number of photos shown on the homepage at once - the homepage album
-     * can hold far more than makes sense to show on a first impression, so a
-     * random subset is picked on every page load. The rest is sent along as
-     * a pool the page slowly rotates in from client-side, fading photos
-     * currently on screen out for ones that aren't shown yet.
-     */
-    private const PHOTO_COUNT = 12;
-
     public function __invoke(RecordViewAction $recordView): View
     {
         $recordView->execute(Page::forSlug('welcome'));
+
+        $settings = Setting::current();
 
         // Guards against a private album ever being shown here unprotected -
         // the homepage has no password gate of its own, unlike /album/{slug}.
@@ -35,8 +29,14 @@ class WelcomeController extends Controller
 
         return view('pages.welcome', [
             'homepageAlbum' => $homepageAlbum,
-            'homepagePhotos' => $shuffledPhotos?->take(self::PHOTO_COUNT)->values(),
-            'homepagePhotoPool' => $shuffledPhotos?->slice(self::PHOTO_COUNT)->values(),
+            'homepagePhotos' => $shuffledPhotos?->take($settings->homepage_photo_count)->values(),
+            'homepagePhotoPool' => $shuffledPhotos?->slice($settings->homepage_photo_count)->values(),
+            'homepageRotateSeconds' => $settings->homepage_rotate_seconds,
+            // The layout's own View::composer only shares this with
+            // components.layouts.public's internal scope (header/footer),
+            // not with slot content passed into it from this view - so this
+            // page needs its own copy for the placeholder text below.
+            'siteSettings' => $settings,
         ]);
     }
 }

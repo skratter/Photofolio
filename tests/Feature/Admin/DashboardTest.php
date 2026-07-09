@@ -3,6 +3,7 @@
 use App\Livewire\Admin\Dashboard;
 use App\Models\Album;
 use App\Models\Photo;
+use App\Models\Setting;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -10,6 +11,15 @@ test('guests are redirected to login', function () {
     $response = $this->get(route('admin.dashboard'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('the sidebar brand reflects the configured site name', function () {
+    $user = User::factory()->create();
+    Setting::current()->update(['site_name' => 'Meine Fotoseite']);
+
+    $response = $this->actingAs($user)->get(route('admin.dashboard'));
+
+    $response->assertOk()->assertSeeText('Meine Fotoseite');
 });
 
 test('it shows the album count, photo count and top album', function () {

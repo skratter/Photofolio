@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,6 +17,14 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Setting::current() memoizes its result in a static property for
+        // the lifetime of one HTTP request - but Pest runs many tests in one
+        // continuous PHP process, so without resetting it here, whichever
+        // test happens to touch Setting first "wins" for every test after
+        // it, even though RefreshDatabase gives each test a clean database.
+        Setting::forgetCached();
+    })
     ->in('Feature');
 
 /*

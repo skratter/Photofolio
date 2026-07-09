@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\RecordViewAction;
 use App\Models\Page;
 use App\Models\PageAttachment;
+use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -34,6 +35,6 @@ class PageShow extends Component
 
     public function render(): View
     {
-        return view('livewire.page-show')->title($this->page->title ?: config('app.name'));
+        return view('livewire.page-show')->title($this->page->title ?: Setting::current()->site_name);
     }
 }
