@@ -1,8 +1,16 @@
 <div class="mx-auto max-w-5xl px-6 pt-8 pb-16">
-    <div class="mb-8">
-        <flux:heading size="xl">{{ $album->title }}</flux:heading>
-        @if ($album->description)
-            <flux:text class="mt-2 text-zinc-500">{{ $album->description }}</flux:text>
+    <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <flux:heading size="xl">{{ $album->title }}</flux:heading>
+            @if ($album->description)
+                <flux:text class="mt-2 text-zinc-500">{{ $album->description }}</flux:text>
+            @endif
+        </div>
+
+        @if ($album->isAccessible() && $album->downloads_enabled && $this->totalPhotoCount > 0)
+            <flux:button size="sm" icon="arrow-down-tray" :href="route('albums.download', $album)" download>
+                Album herunterladen
+            </flux:button>
         @endif
     </div>
 

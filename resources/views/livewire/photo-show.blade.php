@@ -25,7 +25,15 @@
         </div>
 
         <div class="space-y-6">
-            <flux:heading size="xl">{{ $photo->title ?: 'Ohne Titel' }}</flux:heading>
+            <div class="flex items-start justify-between gap-4">
+                <flux:heading size="xl">{{ $photo->title ?: 'Ohne Titel' }}</flux:heading>
+
+                @if ($album->downloads_enabled)
+                    <flux:button size="sm" icon="arrow-down-tray" :href="route('albums.photos.download', [$album, $photo])" download>
+                        Herunterladen
+                    </flux:button>
+                @endif
+            </div>
 
             @if ($photo->notes)
                 <flux:text class="text-zinc-500">{{ $photo->notes }}</flux:text>

@@ -140,3 +140,41 @@ test('jumping to an out-of-range page clamps to the nearest valid page', functio
 
     $component->call('goToPage', 0)->assertSet('page', 1);
 });
+
+test('a public album with photos shows a download link', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->assertSeeHtml(route('albums.download', $album));
+});
+
+test('an album with downloads disabled does not show a download link', function () {
+    $album = Album::factory()->create(['downloads_enabled' => false]);
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->assertDontSeeHtml(route('albums.download', $album));
+});
+
+test('a locked private album does not show a download link', function () {
+    $album = Album::factory()->private()->create();
+    $album->setPassword('secret123');
+    $album->save();
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->assertDontSeeHtml(route('albums.download', $album));
+});
+
+test('a private album shows a download link once unlocked', function () {
+    $album = Album::factory()->private()->create();
+    $album->setPassword('secret123');
+    $album->save();
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->set('password', 'secret123')
+        ->call('unlock')
+        ->assertSeeHtml(route('albums.download', $album));
+});

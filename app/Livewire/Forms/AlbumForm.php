@@ -33,6 +33,8 @@ class AlbumForm extends Form
 
     public bool $is_homepage = false;
 
+    public bool $downloads_enabled = true;
+
     public function setAlbum(Album $album): void
     {
         $this->album = $album;
@@ -43,6 +45,7 @@ class AlbumForm extends Form
         $this->sort_order = $album->sort_order;
         $this->password = '';
         $this->is_homepage = $album->is_homepage;
+        $this->downloads_enabled = $album->downloads_enabled;
     }
 
     public function generateSlugFromTitle(): void
@@ -66,6 +69,7 @@ class AlbumForm extends Form
             'visibility' => $this->visibility,
             'sort_order' => $this->sort_order,
             'is_homepage' => $this->visibility === 'public' && $this->is_homepage,
+            'downloads_enabled' => $this->downloads_enabled,
         ]);
 
         if ($this->visibility === 'private' && $this->password !== '') {
@@ -88,6 +92,7 @@ class AlbumForm extends Form
             'visibility' => $this->visibility,
             'sort_order' => $this->sort_order,
             'is_homepage' => $this->visibility === 'public' && $this->is_homepage,
+            'downloads_enabled' => $this->downloads_enabled,
         ]);
 
         // Only touch the password if a new one was actually entered.

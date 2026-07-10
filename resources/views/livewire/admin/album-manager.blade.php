@@ -109,6 +109,12 @@
                 </flux:field>
             @endif
 
+            <flux:field variant="inline">
+                <flux:checkbox wire:model="form.downloads_enabled" />
+                <flux:label>Download erlauben</flux:label>
+                <flux:description>Zeigt Besuchern einen Download-Button für einzelne Fotos und das ganze Album.</flux:description>
+            </flux:field>
+
             <div class="flex justify-end gap-2">
                 <flux:button variant="ghost" type="button" wire:click="$set('showModal', false)">
                     Abbrechen

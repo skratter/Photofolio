@@ -27,6 +27,7 @@ class AlbumFactory extends Factory
             'visibility' => 'public',
             'sort_order' => 0,
             'is_homepage' => false,
+            'downloads_enabled' => true,
         ];
     }
 
@@ -34,6 +35,13 @@ class AlbumFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'visibility' => 'private',
+        ]);
+    }
+
+    public function withoutDownloads(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'downloads_enabled' => false,
         ]);
     }
 }

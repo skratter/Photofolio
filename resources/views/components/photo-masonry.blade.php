@@ -8,6 +8,7 @@
         'width' => $photo->width,
         'height' => $photo->height,
         'detailUrl' => Route::has('albums.photos.show') ? route('albums.photos.show', [$album, $photo]) : null,
+        'download' => $album->downloads_enabled ? route('albums.photos.download', [$album, $photo]) : null,
     ];
 
     $photosData = $photos->map($mapPhoto)->values();
@@ -38,7 +39,7 @@
     <div x-ref="grid" x-cloak x-bind:class="laidOut ? 'opacity-100' : 'opacity-0'" class="relative transition-opacity duration-300">
         @foreach ($photos as $index => $photo)
             <button type="button" x-on:click="open({{ $index }})" x-data="{ loaded: false }" data-slot="{{ $index }}"
-                class="absolute overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800 transition-[top,left,width,height] duration-500 ease-in-out"
+                class="group absolute cursor-pointer overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800 transition-[top,left,width,height] duration-500 ease-in-out"
                 aria-label="{{ $photo->title ?: 'Foto ansehen' }}">
                 {{-- No loading="lazy": these tiles are positioned via
                      JS (see layoutMasonry() in app.js), so at the moment the
@@ -56,7 +57,11 @@
                 <img src="{{ route('albums.photos.thumb', [$album, $photo]) }}" alt="{{ $photo->title }}"
                     x-init="if ($el.complete) loaded = true" x-on:load="loaded = true"
                     x-bind:class="loaded ? 'opacity-100' : 'opacity-0'"
-                    class="h-full w-full rounded-lg object-cover transition-opacity duration-700">
+                    class="h-full w-full rounded-lg object-cover transition-[opacity,transform] duration-700 group-hover:scale-110">
+                <div
+                    class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition duration-300 group-hover:bg-black/30 group-hover:opacity-100">
+                    <flux:icon name="arrows-pointing-out" class="size-8 text-white drop-shadow" />
+                </div>
             </button>
         @endforeach
     </div>
@@ -89,6 +94,12 @@
             </button>
             <template x-if="index !== null && photos[index].detailUrl">
                 <a :href="photos[index].detailUrl" class="underline hover:text-white">Details</a>
+            </template>
+            <template x-if="index !== null && photos[index].download">
+                <a :href="photos[index].download" download class="flex items-center gap-1 hover:text-white" aria-label="Foto herunterladen">
+                    <flux:icon name="arrow-down-tray" class="size-4" />
+                    <span>Download</span>
+                </a>
             </template>
         </div>
     </div>

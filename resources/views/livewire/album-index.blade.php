@@ -8,7 +8,7 @@
             @foreach ($this->albums as $album)
                 <a href="{{ Route::has('albums.show') ? route('albums.show', $album->slug) : '#' }}" wire:navigate
                     x-data="{ loaded: false }" class="group block">
-                    <div class="aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                    <div class="relative aspect-square overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
                         @php $cover = $album->effectiveCoverPhoto(); @endphp
                         @if ($cover?->isProcessed())
                             <img src="{{ route('albums.photos.thumb', [$album, $cover]) }}" alt=""
@@ -16,6 +16,10 @@
                                 x-bind:class="loaded ? 'opacity-100' : 'opacity-0'"
                                 class="size-full object-cover transition duration-500 group-hover:scale-105">
                         @endif
+                        <div
+                            class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition duration-300 group-hover:bg-black/20 group-hover:opacity-100">
+                            <flux:icon name="arrow-right" class="size-8 text-white drop-shadow" />
+                        </div>
                     </div>
                     <div class="mt-2">
                         <flux:heading size="sm">{{ $album->title }}</flux:heading>

@@ -45,3 +45,29 @@ test('a private album cannot be saved as the homepage', function () {
 
     expect($album->fresh()->is_homepage)->toBeFalse();
 });
+
+test('new albums default to downloads enabled', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(AlbumManager::class)
+        ->call('openCreateModal')
+        ->set('form.title', 'Sommerurlaub')
+        ->set('form.slug', 'sommerurlaub')
+        ->call('save');
+
+    expect(Album::where('slug', 'sommerurlaub')->first()->downloads_enabled)->toBeTrue();
+});
+
+test('downloads can be disabled for an album', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(AlbumManager::class)
+        ->call('openEditModal', $album->id)
+        ->set('form.downloads_enabled', false)
+        ->call('save');
+
+    expect($album->fresh()->downloads_enabled)->toBeFalse();
+});

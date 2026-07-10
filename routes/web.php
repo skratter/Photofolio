@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\PageAttachmentController;
 use App\Http\Controllers\Admin\PhotoVariantController;
+use App\Http\Controllers\AlbumDownloadController;
+use App\Http\Controllers\PhotoDownloadController;
 use App\Http\Controllers\PhotoVariantController as PublicPhotoVariantController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\ScheduleRunController;
@@ -27,6 +29,7 @@ Route::get('/seite/{page:slug}', PageShow::class)->name('pages.show');
 
 Route::get('/alben', AlbumIndex::class)->name('albums.index');
 Route::get('/album/{album:slug}', PublicAlbumShow::class)->name('albums.show');
+Route::get('/album/{album:slug}/download', AlbumDownloadController::class)->name('albums.download');
 Route::get('/album/{album:slug}/{photo}', PublicPhotoShow::class)->name('albums.photos.show');
 
 Route::get('/album/{album:slug}/{photo}/thumb', PublicPhotoVariantController::class)
@@ -35,6 +38,7 @@ Route::get('/album/{album:slug}/{photo}/thumb', PublicPhotoVariantController::cl
 Route::get('/album/{album:slug}/{photo}/display', PublicPhotoVariantController::class)
     ->defaults('variant', 'display')
     ->name('albums.photos.display');
+Route::get('/album/{album:slug}/{photo}/download', PhotoDownloadController::class)->name('albums.photos.download');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsTxtController::class)->name('robots');

@@ -26,6 +26,7 @@ class Album extends Model implements Viewable
         'visibility',
         'sort_order',
         'is_homepage',
+        'downloads_enabled',
     ];
 
     protected $hidden = [
@@ -36,6 +37,7 @@ class Album extends Model implements Viewable
     {
         return [
             'is_homepage' => 'boolean',
+            'downloads_enabled' => 'boolean',
             'sort_order' => 'integer',
         ];
     }

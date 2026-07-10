@@ -47,3 +47,16 @@ Mehrfachauswahl per Checkbox, dazu:
 - **Löschen**: einzeln oder als Massenoperation, inklusive Storage-Verzeichnis.
 - **Download**: ein einzelnes Foto als Original-Datei, mehrere als ZIP
   (`BuildPhotoZipAction`, disambiguiert gleichnamige Dateien automatisch).
+
+## Öffentlicher Download
+
+Jedes Album hat ein `downloads_enabled`-Flag (Standard: an), im Admin-Formular als Checkbox
+„Download erlauben" einstellbar. Ist es aktiv, zeigen die öffentlichen Seiten:
+
+- Einen „Album herunterladen"-Button auf der Album-Seite (ZIP, `AlbumDownloadController`).
+- Einen Download-Link in der Lightbox und auf der Einzelfoto-Seite (`PhotoDownloadController`).
+
+Beide Controller sind reine `GET`-Routen mit nativem `response()->download()` statt Livewire-Actions
+– ein `wire:click`-Download hatte den Alpine-Masonry-State nach dem DOM-Morph zerstört, weil Livewire
+Dateien base64-kodiert durch den normalen Request-Response-Zyklus schickt. Zugriff ist wie überall an
+`Album::isAccessible()` gebunden, private Alben brauchen also weiterhin das Passwort.
