@@ -25,6 +25,22 @@ test('it shows the configured site name in the header and placeholder', function
     $response->assertOk()->assertSeeText('Meine Fotoseite');
 });
 
+test('it shows the site name as text in the header when no logo is configured', function () {
+    Setting::current()->update(['site_name' => 'Meine Fotoseite']);
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSeeText('Meine Fotoseite');
+});
+
+test('it shows the configured light logo instead of the site name text', function () {
+    Setting::current()->update(['logo_light_path' => 'branding/logo-light.svg']);
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSee(Storage::disk('public')->url('branding/logo-light.svg'), false);
+});
+
 test('it shows a copyright notice with the current year and site name', function () {
     Setting::current()->update(['site_name' => 'Meine Fotoseite']);
 

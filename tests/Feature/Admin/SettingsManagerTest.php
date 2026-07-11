@@ -3,7 +3,13 @@
 use App\Livewire\Admin\SettingsManager;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+
+beforeEach(function () {
+    Storage::fake('public');
+});
 
 test('guests are redirected to login', function () {
     $response = $this->get(route('admin.settings'));
@@ -82,4 +88,79 @@ test('leaving a social link empty removes it', function () {
         ->assertHasNoErrors();
 
     expect(Setting::current()->social_instagram_url)->toBeNull();
+});
+
+test('uploading branding files stores them on the public disk and records their paths', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(SettingsManager::class)
+        ->set('form.favicon', UploadedFile::fake()->create('favicon.svg', 10, 'image/svg+xml'))
+        ->set('form.logoLight', UploadedFile::fake()->image('logo-black.png'))
+        ->set('form.logoDark', UploadedFile::fake()->image('logo-white.png'))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $setting = Setting::current();
+
+    expect($setting->favicon_path)->not->toBeNull()
+        ->and($setting->logo_light_path)->not->toBeNull()
+        ->and($setting->logo_dark_path)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($setting->favicon_path);
+    Storage::disk('public')->assertExists($setting->logo_light_path);
+    Storage::disk('public')->assertExists($setting->logo_dark_path);
+});
+
+test('uploading a new favicon replaces and deletes the previous file', function () {
+    $user = User::factory()->create();
+
+    $component = Livewire::actingAs($user)->test(SettingsManager::class)
+        ->set('form.favicon', UploadedFile::fake()->image('first.png'))
+        ->call('save');
+
+    $firstPath = Setting::current()->favicon_path;
+
+    $component->set('form.favicon', UploadedFile::fake()->image('second.png'))
+        ->call('save');
+
+    $secondPath = Setting::current()->favicon_path;
+
+    expect($secondPath)->not->toBe($firstPath);
+    Storage::disk('public')->assertMissing($firstPath);
+    Storage::disk('public')->assertExists($secondPath);
+});
+
+test('removing the favicon clears the path and deletes the file', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)->test(SettingsManager::class)
+        ->set('form.favicon', UploadedFile::fake()->image('favicon.png'))
+        ->call('save');
+
+    $path = Setting::current()->favicon_path;
+
+    Livewire::actingAs($user)
+        ->test(SettingsManager::class)
+        ->call('removeFavicon');
+
+    expect(Setting::current()->favicon_path)->toBeNull();
+    Storage::disk('public')->assertMissing($path);
+});
+
+test('removing the light and dark logos clears their paths', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)->test(SettingsManager::class)
+        ->set('form.logoLight', UploadedFile::fake()->image('logo-black.png'))
+        ->set('form.logoDark', UploadedFile::fake()->image('logo-white.png'))
+        ->call('save');
+
+    Livewire::actingAs($user)
+        ->test(SettingsManager::class)
+        ->call('removeLogoLight')
+        ->call('removeLogoDark');
+
+    expect(Setting::current()->logo_light_path)->toBeNull()
+        ->and(Setting::current()->logo_dark_path)->toBeNull();
 });

@@ -10,6 +10,45 @@
         </flux:field>
 
         <flux:field>
+            <flux:label>Favicon</flux:label>
+            <flux:input type="file" wire:model="form.favicon" accept="image/svg+xml,image/png,image/x-icon" />
+            <flux:description>SVG oder PNG, quadratisch. Ohne eigene Datei gilt das Standard-Favicon.</flux:description>
+            <flux:error name="form.favicon" />
+            @if ($this->setting->faviconUrl())
+                <div class="mt-2 flex items-center gap-3">
+                    <img src="{{ $this->setting->faviconUrl() }}" alt="" class="size-8 rounded border border-zinc-200 object-contain dark:border-zinc-700">
+                    <flux:button size="sm" variant="ghost" wire:click="removeFavicon">Entfernen</flux:button>
+                </div>
+            @endif
+        </flux:field>
+
+        <flux:field>
+            <flux:label>Logo (helles Farbschema)</flux:label>
+            <flux:input type="file" wire:model="form.logoLight" accept="image/svg+xml,image/png,image/jpeg,image/webp" />
+            <flux:description>Ersetzt den Seitennamen oben links im Kopfbereich durch ein Bild, solange das helle Farbschema aktiv ist. Ohne eigene Datei bleibt der Seitenname als Text stehen.</flux:description>
+            <flux:error name="form.logoLight" />
+            @if ($this->setting->logoLightUrl())
+                <div class="mt-2 flex items-center gap-3">
+                    <img src="{{ $this->setting->logoLightUrl() }}" alt="" class="h-8 max-w-40 rounded border border-zinc-200 bg-white object-contain p-1 dark:border-zinc-700">
+                    <flux:button size="sm" variant="ghost" wire:click="removeLogoLight">Entfernen</flux:button>
+                </div>
+            @endif
+        </flux:field>
+
+        <flux:field>
+            <flux:label>Logo (dunkles Farbschema)</flux:label>
+            <flux:input type="file" wire:model="form.logoDark" accept="image/svg+xml,image/png,image/jpeg,image/webp" />
+            <flux:description>Wird im dunklen Farbschema anstelle des obigen Logos gezeigt. Wirkt nur, wenn zusätzlich ein Logo für das helle Farbschema hinterlegt ist.</flux:description>
+            <flux:error name="form.logoDark" />
+            @if ($this->setting->logoDarkUrl())
+                <div class="mt-2 flex items-center gap-3">
+                    <img src="{{ $this->setting->logoDarkUrl() }}" alt="" class="h-8 max-w-40 rounded border border-zinc-200 bg-zinc-800 object-contain p-1 dark:border-zinc-700">
+                    <flux:button size="sm" variant="ghost" wire:click="removeLogoDark">Entfernen</flux:button>
+                </div>
+            @endif
+        </flux:field>
+
+        <flux:field>
             <flux:label>Anzahl Startseitenfotos</flux:label>
             <flux:input type="number" wire:model="form.homepage_photo_count" />
             <flux:description>Wie viele Fotos gleichzeitig auf der Startseite gezeigt werden.</flux:description>

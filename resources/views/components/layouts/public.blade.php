@@ -10,8 +10,17 @@
                      served from Livewire's SPA-navigation cache the way
                      other (static) pages are - otherwise clicking back here
                      just replays whatever selection was cached. --}}
-                <a href="{{ route('home') }}" class="font-mono text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                    {{ $siteSettings->site_name }}
+                <a href="{{ route('home') }}" class="flex items-center font-mono text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    @if ($siteSettings->logoLightUrl())
+                        <img src="{{ $siteSettings->logoLightUrl() }}" alt="{{ $siteSettings->site_name }}"
+                            class="h-8 w-auto {{ $siteSettings->logoDarkUrl() ? 'dark:hidden' : '' }}">
+                        @if ($siteSettings->logoDarkUrl())
+                            <img src="{{ $siteSettings->logoDarkUrl() }}" alt="{{ $siteSettings->site_name }}"
+                                class="hidden h-8 w-auto dark:block">
+                        @endif
+                    @else
+                        {{ $siteSettings->site_name }}
+                    @endif
                 </a>
 
                 <nav class="flex flex-1 flex-wrap items-center justify-end gap-x-6 gap-y-1 text-sm text-zinc-600 dark:text-zinc-300">

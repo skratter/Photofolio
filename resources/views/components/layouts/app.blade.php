@@ -8,11 +8,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? $siteSettings->site_name }}</title>
 
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicons/favicon-48.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/favincon-512.png">
-    <link rel="shortcut icon" href="/favicon.ico">
+    @if ($siteSettings->faviconUrl())
+        <link rel="icon" href="{{ $siteSettings->faviconUrl() }}">
+        <link rel="apple-touch-icon" href="{{ $siteSettings->faviconUrl() }}">
+    @else
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicons/favicon-48.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/favicon-512.png">
+        <link rel="shortcut icon" href="/favicon.ico">
+    @endif
     <link rel="manifest" href="/site.webmanifest">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

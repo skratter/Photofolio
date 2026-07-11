@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Setting extends Model
 {
@@ -10,6 +11,9 @@ class Setting extends Model
 
     protected $fillable = [
         'site_name',
+        'favicon_path',
+        'logo_light_path',
+        'logo_dark_path',
         'homepage_photo_count',
         'homepage_rotate_seconds',
         'slideshow_autoplay_seconds',
@@ -79,6 +83,27 @@ class Setting extends Model
     public static function forgetCached(): void
     {
         static::$cached = null;
+    }
+
+    /**
+     * Custom branding uploaded via the settings screen, so a Photofolio
+     * installation isn't stuck with this project's own default favicon/logo
+     * - falls back to null (callers fall back to the shipped defaults) when
+     * nothing's been uploaded.
+     */
+    public function faviconUrl(): ?string
+    {
+        return $this->favicon_path ? Storage::disk('public')->url($this->favicon_path) : null;
+    }
+
+    public function logoLightUrl(): ?string
+    {
+        return $this->logo_light_path ? Storage::disk('public')->url($this->logo_light_path) : null;
+    }
+
+    public function logoDarkUrl(): ?string
+    {
+        return $this->logo_dark_path ? Storage::disk('public')->url($this->logo_dark_path) : null;
     }
 
     /**

@@ -3,13 +3,24 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class SettingForm extends Form
 {
     #[Validate('required|string|max:255')]
     public string $site_name = '';
+
+    #[Validate('nullable|mimes:svg,png,ico|max:2048')]
+    public ?TemporaryUploadedFile $favicon = null;
+
+    #[Validate('nullable|mimes:svg,png,jpg,jpeg,webp|max:2048')]
+    public ?TemporaryUploadedFile $logoLight = null;
+
+    #[Validate('nullable|mimes:svg,png,jpg,jpeg,webp|max:2048')]
+    public ?TemporaryUploadedFile $logoDark = null;
 
     #[Validate('required|integer|min:1|max:100')]
     public int $homepage_photo_count = 12;
@@ -72,7 +83,7 @@ class SettingForm extends Form
     {
         $this->validate();
 
-        $setting->update([
+        $data = [
             'site_name' => $this->site_name,
             'homepage_photo_count' => $this->homepage_photo_count,
             'homepage_rotate_seconds' => $this->homepage_rotate_seconds,
@@ -87,8 +98,35 @@ class SettingForm extends Form
             'social_youtube_url' => $this->social_youtube_url ?: null,
             'social_pinterest_url' => $this->social_pinterest_url ?: null,
             'analytics_own_domains' => $this->analytics_own_domains ?: null,
-        ]);
+        ];
+
+        if ($this->favicon) {
+            $data['favicon_path'] = $this->replaceBrandingFile($setting->favicon_path, $this->favicon);
+        }
+
+        if ($this->logoLight) {
+            $data['logo_light_path'] = $this->replaceBrandingFile($setting->logo_light_path, $this->logoLight);
+        }
+
+        if ($this->logoDark) {
+            $data['logo_dark_path'] = $this->replaceBrandingFile($setting->logo_dark_path, $this->logoDark);
+        }
+
+        $setting->update($data);
+
+        $this->favicon = null;
+        $this->logoLight = null;
+        $this->logoDark = null;
 
         Setting::forgetCached();
+    }
+
+    private function replaceBrandingFile(?string $oldPath, TemporaryUploadedFile $file): string
+    {
+        if ($oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        return $file->store('branding', 'public');
     }
 }
