@@ -141,33 +141,120 @@ test('jumping to an out-of-range page clamps to the nearest valid page', functio
     $component->call('goToPage', 0)->assertSet('page', 1);
 });
 
-test('a public album with photos shows a download link', function () {
+test('a public album with photos shows a download button that starts selection mode', function () {
     $album = Album::factory()->create();
     Photo::factory()->for($album)->processed()->create();
 
     Livewire::test(AlbumShow::class, ['album' => $album])
-        ->assertSeeHtml(route('albums.download', $album));
+        ->assertSeeHtml('wire:click="startSelecting"');
 });
 
-test('an album with downloads disabled does not show a download link', function () {
+test('an album with downloads disabled does not show a download button', function () {
     $album = Album::factory()->create(['downloads_enabled' => false]);
     Photo::factory()->for($album)->processed()->create();
 
     Livewire::test(AlbumShow::class, ['album' => $album])
-        ->assertDontSeeHtml(route('albums.download', $album));
+        ->assertDontSeeHtml('wire:click="startSelecting"');
 });
 
-test('a locked private album does not show a download link', function () {
+test('a locked private album does not show a download button', function () {
     $album = Album::factory()->private()->create();
     $album->setPassword('secret123');
     $album->save();
     Photo::factory()->for($album)->processed()->create();
 
     Livewire::test(AlbumShow::class, ['album' => $album])
-        ->assertDontSeeHtml(route('albums.download', $album));
+        ->assertDontSeeHtml('wire:click="startSelecting"');
 });
 
-test('a private album shows a download link once unlocked', function () {
+test('starting selection mode shows the selection toolbar and the full-album download link', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->assertSet('selecting', true)
+        ->assertSeeText('0 ausgewählt')
+        ->assertSeeHtml(route('albums.download', $album));
+});
+
+test('toggling a photo adds and then removes it from the selection', function () {
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    $component = Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('toggleSelect', $photo->id)
+        ->assertSet('selectedPhotoIds', [$photo->id]);
+
+    $component->call('toggleSelect', $photo->id)
+        ->assertSet('selectedPhotoIds', []);
+});
+
+test('selection survives switching pages', function () {
+    $album = Album::factory()->create();
+    $photos = Photo::factory()->for($album)->processed()->count(45)->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('toggleSelect', $photos->first()->id)
+        ->call('goToPage', 2)
+        ->assertSet('selectedPhotoIds', [$photos->first()->id])
+        ->assertSet('selecting', true);
+});
+
+test('selecting all on the current page adds to an existing cross-page selection', function () {
+    $album = Album::factory()->create();
+    $photos = Photo::factory()->for($album)->processed()->count(45)->create();
+    $firstPageIds = $photos->take(30)->pluck('id')->all();
+    $fromPageTwo = $photos->last()->id;
+
+    $component = Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('goToPage', 2)
+        ->call('toggleSelect', $fromPageTwo)
+        ->call('goToPage', 1)
+        ->call('selectAllOnPage');
+
+    expect($component->get('selectedPhotoIds'))
+        ->toEqualCanonicalizing([...$firstPageIds, $fromPageTwo]);
+});
+
+test('clearing the selection empties it without leaving selection mode', function () {
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('toggleSelect', $photo->id)
+        ->call('clearSelection')
+        ->assertSet('selectedPhotoIds', [])
+        ->assertSet('selecting', true);
+});
+
+test('stopping selection clears the selection and leaves selection mode', function () {
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('toggleSelect', $photo->id)
+        ->call('stopSelecting')
+        ->assertSet('selecting', false)
+        ->assertSet('selectedPhotoIds', []);
+});
+
+test('a selected photo shows a download link scoped to that selection', function () {
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->call('startSelecting')
+        ->call('toggleSelect', $photo->id)
+        ->assertSeeHtml(route('albums.download', ['album' => $album, 'ids' => (string) $photo->id]));
+});
+
+test('a private album shows a download button once unlocked', function () {
     $album = Album::factory()->private()->create();
     $album->setPassword('secret123');
     $album->save();
@@ -176,5 +263,18 @@ test('a private album shows a download link once unlocked', function () {
     Livewire::test(AlbumShow::class, ['album' => $album])
         ->set('password', 'secret123')
         ->call('unlock')
+        ->assertSeeHtml('wire:click="startSelecting"');
+});
+
+test('a private album shows the full-album download link once unlocked and selecting', function () {
+    $album = Album::factory()->private()->create();
+    $album->setPassword('secret123');
+    $album->save();
+    Photo::factory()->for($album)->processed()->create();
+
+    Livewire::test(AlbumShow::class, ['album' => $album])
+        ->set('password', 'secret123')
+        ->call('unlock')
+        ->call('startSelecting')
         ->assertSeeHtml(route('albums.download', $album));
 });

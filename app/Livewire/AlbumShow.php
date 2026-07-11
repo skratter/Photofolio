@@ -26,6 +26,11 @@ class AlbumShow extends Component
     #[Url(as: 'seite')]
     public int $page = 1;
 
+    public bool $selecting = false;
+
+    /** @var array<int, int> */
+    public array $selectedPhotoIds = [];
+
     public function mount(): void
     {
         if ($this->album->isAccessible()) {
@@ -51,6 +56,46 @@ class AlbumShow extends Component
     {
         $this->page = max(1, min($page, $this->totalPages()));
         unset($this->photos);
+    }
+
+    public function startSelecting(): void
+    {
+        $this->selecting = true;
+    }
+
+    public function stopSelecting(): void
+    {
+        $this->selecting = false;
+        $this->selectedPhotoIds = [];
+    }
+
+    public function toggleSelect(int $photoId): void
+    {
+        if (($key = array_search($photoId, $this->selectedPhotoIds, true)) !== false) {
+            unset($this->selectedPhotoIds[$key]);
+            $this->selectedPhotoIds = array_values($this->selectedPhotoIds);
+
+            return;
+        }
+
+        $this->selectedPhotoIds[] = $photoId;
+    }
+
+    /**
+     * Adds every photo on the current page to the selection, on top of
+     * whatever was already selected on other pages.
+     */
+    public function selectAllOnPage(): void
+    {
+        $this->selectedPhotoIds = array_values(array_unique([
+            ...$this->selectedPhotoIds,
+            ...$this->photos->pluck('id')->all(),
+        ]));
+    }
+
+    public function clearSelection(): void
+    {
+        $this->selectedPhotoIds = [];
     }
 
     /**

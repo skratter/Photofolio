@@ -79,3 +79,57 @@ test('returns 404 for an album with no processed photos', function () {
 
     $response->assertNotFound();
 });
+
+test('downloading with an ids filter only includes the selected photos', function () {
+    $album = Album::factory()->create(['title' => 'Sommerurlaub']);
+    $keep1 = Photo::factory()->for($album)->processed()->create();
+    $keep2 = Photo::factory()->for($album)->processed()->create();
+    $excluded = Photo::factory()->for($album)->processed()->create();
+
+    foreach ([$keep1, $keep2, $excluded] as $photo) {
+        File::ensureDirectoryExists($photo->directoryPath());
+        File::put($photo->originalPath(), 'fake-image-bytes');
+    }
+
+    $response = $this->get(route('albums.download', ['album' => $album, 'ids' => "{$keep1->id},{$keep2->id}"]));
+
+    $response->assertDownload(Str::slug($album->title).'.zip');
+});
+
+test('downloading with a single id in the ids filter returns the original file', function () {
+    $album = Album::factory()->create();
+    $photo = Photo::factory()->for($album)->processed()->create(['title' => 'Strand']);
+    Photo::factory()->for($album)->processed()->create();
+
+    File::ensureDirectoryExists($photo->directoryPath());
+    File::put($photo->originalPath(), 'fake-image-bytes');
+
+    $response = $this->get(route('albums.download', ['album' => $album, 'ids' => (string) $photo->id]));
+
+    $response->assertDownload('strand.jpg');
+});
+
+test('ids belonging to another album are ignored', function () {
+    $album = Album::factory()->create();
+    $otherAlbum = Album::factory()->create();
+    $ownPhoto = Photo::factory()->for($album)->processed()->create(['title' => 'Eigenes']);
+    $foreignPhoto = Photo::factory()->for($otherAlbum)->processed()->create();
+
+    foreach ([$ownPhoto, $foreignPhoto] as $photo) {
+        File::ensureDirectoryExists($photo->directoryPath());
+        File::put($photo->originalPath(), 'fake-image-bytes');
+    }
+
+    $response = $this->get(route('albums.download', ['album' => $album, 'ids' => "{$ownPhoto->id},{$foreignPhoto->id}"]));
+
+    $response->assertDownload('eigenes.jpg');
+});
+
+test('an ids filter matching nothing returns 404', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->create();
+
+    $response = $this->get(route('albums.download', ['album' => $album, 'ids' => '999999']));
+
+    $response->assertNotFound();
+});

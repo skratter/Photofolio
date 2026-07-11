@@ -53,8 +53,19 @@ Mehrfachauswahl per Checkbox, dazu:
 Jedes Album hat ein `downloads_enabled`-Flag (Standard: an), im Admin-Formular als Checkbox
 „Download erlauben" einstellbar. Ist es aktiv, zeigen die öffentlichen Seiten:
 
-- Einen „Album herunterladen"-Button auf der Album-Seite (ZIP, `AlbumDownloadController`).
+- Einen „Album herunterladen"-Button auf der Album-Seite. Er startet den Auswahlmodus
+  (`AlbumShow::$selecting`/`$selectedPhotoIds`), der die Masonry-Ansicht durch ein einfaches
+  Checkbox-Grid ersetzt. Die Auswahl bleibt seitenübergreifend erhalten (liegt als PHP-Property auf
+  der Livewire-Komponente, nicht im Alpine-State), „Diese Seite auswählen" ergänzt sie um die
+  aktuelle Seite. Von dort aus lässt sich entweder die Auswahl oder das ganze Album laden
+  (`AlbumDownloadController`, optionaler `?ids=`-Query-Parameter für eine Teilmenge).
 - Einen Download-Link in der Lightbox und auf der Einzelfoto-Seite (`PhotoDownloadController`).
+
+Der Wechsel zum Checkbox-Grid im Auswahlmodus (statt Checkboxen direkt in die Masonry-Kacheln zu
+legen) ist bewusst: Die Masonry-Tiles werden von JS absolut positioniert (`layoutMasonry()` in
+app.js) und lesen dafür Inline-Styles, die ein Livewire-Morph beim Umschalten einer Checkbox
+überschreiben könnte, ohne dass danach etwas ein Re-Layout auslöst. Das separate Grid ist ein
+normales, nicht positioniertes Raster wie im Admin-Bereich und hat dieses Problem nicht.
 
 Beide Controller sind reine `GET`-Routen mit nativem `response()->download()` statt Livewire-Actions
 – ein `wire:click`-Download hatte den Alpine-Masonry-State nach dem DOM-Morph zerstört, weil Livewire
