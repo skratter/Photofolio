@@ -61,9 +61,16 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+php artisan storage:link
 npm install
 npm run build
 ```
+
+`storage:link` legt den Symlink an, über den hochgeladene Branding-Assets (Favicon, Logo) und
+Seiten-Anhänge öffentlich unter `/storage/...` erreichbar sind. Ohne ihn werden Dateien zwar
+weiterhin korrekt gespeichert, aber im Browser als 404 angezeigt. Auf Shared-Hosting ohne
+Symlink-Unterstützung ersatzweise direkt per Shell: `ln -s ../storage/app/public public/storage`
+(im `public/`-Verzeichnis ausgeführt).
 
 Für die lokale Entwicklung mit Hot-Reload und laufendem Queue-Worker:
 

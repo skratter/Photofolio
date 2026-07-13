@@ -124,4 +124,9 @@ class Photo extends Model implements Viewable
 
         return "{$base}.{$extension}";
     }
+
+    public function metaDescription(): ?string
+    {
+        return $this->notes ? Str::limit(trim($this->notes), 160) : null;
+    }
 }

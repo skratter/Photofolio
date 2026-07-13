@@ -44,3 +44,29 @@ test('a private album is accessible once unlocked in session', function () {
 
     expect($album->isAccessible())->toBeTrue();
 });
+
+test('meta description strips html tags from the description', function () {
+    $album = Album::factory()->create([
+        'description' => '<p>Ein Wochenende in <strong>Beispielstadt</strong>.</p>',
+    ]);
+
+    expect($album->metaDescription())->toBe('Ein Wochenende in Beispielstadt.');
+});
+
+test('meta description is null when there is no description', function () {
+    $album = Album::factory()->create(['description' => null]);
+
+    expect($album->metaDescription())->toBeNull();
+});
+
+test('meta description is null when the description only contains markup with no text', function () {
+    $album = Album::factory()->create(['description' => '<p><br></p>']);
+
+    expect($album->metaDescription())->toBeNull();
+});
+
+test('meta description is truncated to 160 characters plus an ellipsis', function () {
+    $album = Album::factory()->create(['description' => '<p>'.str_repeat('a', 200).'</p>']);
+
+    expect($album->metaDescription())->toBe(str_repeat('a', 160).'...');
+});

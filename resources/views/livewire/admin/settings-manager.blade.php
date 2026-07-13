@@ -10,6 +10,13 @@
         </flux:field>
 
         <flux:field>
+            <flux:label>Meta-Beschreibung (Startseite)</flux:label>
+            <flux:textarea wire:model="form.homepage_meta_description" rows="2" />
+            <flux:description>Wird für Suchmaschinen und Link-Vorschauen (z. B. beim Teilen) im HTML-Head der Startseite ausgegeben.</flux:description>
+            <flux:error name="form.homepage_meta_description" />
+        </flux:field>
+
+        <flux:field>
             <flux:label>Favicon</flux:label>
             <flux:input type="file" wire:model="form.favicon" accept="image/svg+xml,image/png,image/x-icon" />
             <flux:description>SVG oder PNG, quadratisch. Ohne eigene Datei gilt das Standard-Favicon.</flux:description>

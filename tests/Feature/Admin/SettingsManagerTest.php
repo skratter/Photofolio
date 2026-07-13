@@ -32,6 +32,7 @@ test('it updates the settings', function () {
     Livewire::actingAs($user)
         ->test(SettingsManager::class)
         ->set('form.site_name', 'Meine Fotoseite')
+        ->set('form.homepage_meta_description', 'Fotografie aus aller Welt.')
         ->set('form.homepage_photo_count', 20)
         ->set('form.homepage_rotate_seconds', 10)
         ->set('form.slideshow_autoplay_seconds', 5)
@@ -51,6 +52,7 @@ test('it updates the settings', function () {
     $setting = Setting::current();
 
     expect($setting->site_name)->toBe('Meine Fotoseite')
+        ->and($setting->homepage_meta_description)->toBe('Fotografie aus aller Welt.')
         ->and($setting->homepage_photo_count)->toBe(20)
         ->and($setting->homepage_rotate_seconds)->toBe(10)
         ->and($setting->slideshow_autoplay_seconds)->toBe(5)

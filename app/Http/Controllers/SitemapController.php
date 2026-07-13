@@ -17,21 +17,37 @@ class SitemapController extends Controller
         ];
 
         if (Route::has('albums.show')) {
-            foreach (Album::query()->where('visibility', 'public')->get() as $album) {
+            $albums = Album::query()
+                ->where('visibility', 'public')
+                ->with(['photos' => fn ($query) => $query->processed()])
+                ->get();
+
+            foreach ($albums as $album) {
                 $urls[] = [
                     'loc' => route('albums.show', $album->slug),
                     'lastmod' => $album->updated_at?->toAtomString(),
+                    // Google's image sitemap extension: listing every photo
+                    // shown on the album page as an <image:image> entry helps
+                    // them get indexed by image search, which for a photo
+                    // portfolio matters at least as much as web search.
+                    'images' => Route::has('albums.photos.display')
+                        ? $album->photos->map(fn ($photo) => route('albums.photos.display', [$album, $photo]))->all()
+                        : [],
                 ];
             }
         }
 
-        // No public single-photo page exists yet - this starts working on its
-        // own once one is added under this route name, same as albums above.
         if (Route::has('albums.photos.show')) {
-            foreach (Photo::with('album')->whereHas('album', fn ($query) => $query->where('visibility', 'public'))->get() as $photo) {
+            $photos = Photo::with('album')
+                ->processed()
+                ->whereHas('album', fn ($query) => $query->where('visibility', 'public'))
+                ->get();
+
+            foreach ($photos as $photo) {
                 $urls[] = [
                     'loc' => route('albums.photos.show', [$photo->album, $photo]),
                     'lastmod' => $photo->updated_at?->toAtomString(),
+                    'images' => [route('albums.photos.display', [$photo->album, $photo])],
                 ];
             }
         }

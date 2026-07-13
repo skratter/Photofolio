@@ -22,6 +22,52 @@ test('a public album shows its photos directly', function () {
         ->assertDontSeeText('passwortgeschützt');
 });
 
+test('the description is rendered as raw, unescaped html', function () {
+    $album = Album::factory()->create([
+        'description' => '<p>Ein Wochenende in <a href="https://example.com">Beispielstadt</a>.</p>',
+    ]);
+
+    $response = $this->get(route('albums.show', $album->slug));
+
+    $response->assertOk()
+        ->assertSee('<p>Ein Wochenende in <a href="https://example.com">Beispielstadt</a>.</p>', false);
+});
+
+test('a public album shows meta description and open graph tags derived from its description', function () {
+    $album = Album::factory()->create([
+        'title' => 'Sommerurlaub',
+        'description' => '<p>Ein Wochenende in <strong>Beispielstadt</strong>.</p>',
+    ]);
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    $response = $this->get(route('albums.show', $album->slug));
+
+    $response->assertOk()
+        ->assertSee('<meta name="description" content="Ein Wochenende in Beispielstadt.">', false)
+        ->assertSee('<meta property="og:title" content="Sommerurlaub">', false)
+        ->assertSee(
+            '<meta property="og:image" content="'.route('albums.photos.display', [$album, $photo]).'">',
+            false
+        );
+});
+
+test('a locked private album does not leak meta description or open graph tags', function () {
+    $album = Album::factory()->private()->create([
+        'title' => 'Geheimalbum',
+        'description' => '<p>Streng geheim.</p>',
+    ]);
+    $album->setPassword('secret123');
+    $album->save();
+    Photo::factory()->for($album)->processed()->create();
+
+    $response = $this->get(route('albums.show', $album->slug));
+
+    $response->assertOk()
+        ->assertDontSee('name="description"', false)
+        ->assertDontSee('og:title', false)
+        ->assertDontSee('og:image', false);
+});
+
 test('a private album shows a password form instead of its photos', function () {
     $album = Album::factory()->private()->create(['title' => 'Geheimes Album']);
     $album->setPassword('secret123');

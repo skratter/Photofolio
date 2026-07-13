@@ -19,7 +19,7 @@ class AlbumForm extends Form
     #[Validate('required|string|max:255|alpha_dash')]
     public string $slug = '';
 
-    #[Validate('nullable|string|max:2000')]
+    #[Validate('nullable|string')]
     public string $description = '';
 
     #[Validate('required|in:public,private')]

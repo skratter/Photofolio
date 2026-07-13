@@ -13,6 +13,9 @@ class SettingForm extends Form
     #[Validate('required|string|max:255')]
     public string $site_name = '';
 
+    #[Validate('nullable|string|max:255')]
+    public string $homepage_meta_description = '';
+
     #[Validate('nullable|mimes:svg,png,ico|max:2048')]
     public ?TemporaryUploadedFile $favicon = null;
 
@@ -64,6 +67,7 @@ class SettingForm extends Form
     public function setFromSetting(Setting $setting): void
     {
         $this->site_name = $setting->site_name ?? '';
+        $this->homepage_meta_description = $setting->homepage_meta_description ?? '';
         $this->homepage_photo_count = $setting->homepage_photo_count;
         $this->homepage_rotate_seconds = $setting->homepage_rotate_seconds;
         $this->slideshow_autoplay_seconds = $setting->slideshow_autoplay_seconds;
@@ -85,6 +89,7 @@ class SettingForm extends Form
 
         $data = [
             'site_name' => $this->site_name,
+            'homepage_meta_description' => $this->homepage_meta_description ?: null,
             'homepage_photo_count' => $this->homepage_photo_count,
             'homepage_rotate_seconds' => $this->homepage_rotate_seconds,
             'slideshow_autoplay_seconds' => $this->slideshow_autoplay_seconds,

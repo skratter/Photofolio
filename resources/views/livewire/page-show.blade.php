@@ -2,6 +2,7 @@
     @if ($page->meta_description)
         <meta name="description" content="{{ $page->meta_description }}">
     @endif
+    <x-open-graph :title="$page->title" :description="$page->meta_description" />
 </x-slot:head>
 
 <div class="mx-auto max-w-3xl px-6 py-16">

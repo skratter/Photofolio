@@ -65,6 +65,30 @@ test('it shows a photo in a private album once unlocked in session', function ()
     $response->assertOk()->assertSee('Geheimfoto');
 });
 
+test('it shows open graph tags for the photo', function () {
+    $album = Album::factory()->create(['title' => 'Sommerurlaub']);
+    $photo = Photo::factory()->for($album)->processed()->create(['title' => 'Sonnenuntergang', 'notes' => 'Am Strand aufgenommen.']);
+
+    $response = $this->get(route('albums.photos.show', [$album, $photo]));
+
+    $response->assertOk()
+        ->assertSee('<meta property="og:title" content="Sonnenuntergang">', false)
+        ->assertSee('<meta property="og:description" content="Am Strand aufgenommen.">', false)
+        ->assertSee(
+            '<meta property="og:image" content="'.route('albums.photos.display', [$album, $photo]).'">',
+            false
+        );
+});
+
+test('it falls back to the album title for open graph when the photo has no title', function () {
+    $album = Album::factory()->create(['title' => 'Sommerurlaub']);
+    $photo = Photo::factory()->for($album)->processed()->create(['title' => null]);
+
+    $response = $this->get(route('albums.photos.show', [$album, $photo]));
+
+    $response->assertOk()->assertSee('<meta property="og:title" content="Sommerurlaub">', false);
+});
+
 test('it links to the previous and next photo by sort order', function () {
     $album = Album::factory()->create();
     $first = Photo::factory()->for($album)->processed()->create(['sort_order' => 0]);

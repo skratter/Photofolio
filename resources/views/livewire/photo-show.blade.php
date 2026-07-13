@@ -1,3 +1,11 @@
+<x-slot:head>
+    <x-open-graph
+        :title="$photo->title ?: $album->title"
+        :description="$photo->metaDescription()"
+        :image="route('albums.photos.display', [$album, $photo])"
+    />
+</x-slot:head>
+
 <div class="mx-auto max-w-5xl px-6 pt-8 pb-16">
     <flux:link href="{{ route('albums.show', $album->slug) }}" wire:navigate icon="arrow-left" class="mb-6 inline-flex">
         {{ $album->title }}

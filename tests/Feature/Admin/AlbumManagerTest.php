@@ -71,3 +71,16 @@ test('downloads can be disabled for an album', function () {
 
     expect($album->fresh()->downloads_enabled)->toBeFalse();
 });
+
+test('the description is stored as raw html, unescaped', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(AlbumManager::class)
+        ->call('openEditModal', $album->id)
+        ->set('form.description', '<p>Ein Wochenende in <a href="https://example.com">Beispielstadt</a>.</p>')
+        ->call('save');
+
+    expect($album->fresh()->description)->toBe('<p>Ein Wochenende in <a href="https://example.com">Beispielstadt</a>.</p>');
+});

@@ -50,6 +50,20 @@ test('it shows the meta description in the page head', function () {
     $response->assertSee('Eine tolle Beschreibung.', false);
 });
 
+test('it shows open graph tags for the page', function () {
+    $page = Page::factory()->create([
+        'title' => 'Über mich',
+        'status' => 'published',
+        'meta_description' => 'Eine tolle Beschreibung.',
+    ]);
+
+    $response = $this->get(route('pages.show', $page));
+
+    $response->assertOk()
+        ->assertSee('<meta property="og:title" content="Über mich">', false)
+        ->assertSee('<meta property="og:description" content="Eine tolle Beschreibung.">', false);
+});
+
 test('it lists downloadable attachments', function () {
     Storage::fake('public');
     $page = Page::factory()->create(['status' => 'published']);

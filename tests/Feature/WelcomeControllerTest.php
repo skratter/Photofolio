@@ -41,6 +41,38 @@ test('it shows the configured light logo instead of the site name text', functio
     $response->assertOk()->assertSee(Storage::disk('public')->url('branding/logo-light.svg'), false);
 });
 
+test('it shows the configured homepage meta description and open graph tags', function () {
+    Setting::current()->update([
+        'site_name' => 'Meine Fotoseite',
+        'homepage_meta_description' => 'Fotografie aus aller Welt.',
+    ]);
+
+    $response = $this->get('/');
+
+    $response->assertOk()
+        ->assertSee('<meta name="description" content="Fotografie aus aller Welt.">', false)
+        ->assertSee('<meta property="og:title" content="Meine Fotoseite">', false)
+        ->assertSee('<meta property="og:description" content="Fotografie aus aller Welt.">', false);
+});
+
+test('it uses the homepage album\'s cover photo as the open graph image', function () {
+    $album = Album::factory()->create(['is_homepage' => true]);
+    $photo = Photo::factory()->for($album)->processed()->create();
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSee(
+        '<meta property="og:image" content="'.route('albums.photos.display', [$album, $photo]).'">',
+        false
+    );
+});
+
+test('it has no open graph image when there is no homepage album', function () {
+    $response = $this->get('/');
+
+    $response->assertOk()->assertDontSee('og:image', false);
+});
+
 test('it shows a copyright notice with the current year and site name', function () {
     Setting::current()->update(['site_name' => 'Meine Fotoseite']);
 

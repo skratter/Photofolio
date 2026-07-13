@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class Album extends Model implements Viewable
 {
@@ -61,6 +62,23 @@ class Album extends Model implements Viewable
     public function effectiveCoverPhoto(): ?Photo
     {
         return $this->coverPhoto ?? $this->photos()->orderBy('sort_order')->first();
+    }
+
+    /**
+     * A plain-text summary derived from the (HTML) description, for search
+     * engines and link-preview meta tags - those don't want markup, and a
+     * dedicated field would just duplicate what's already written in the
+     * description.
+     */
+    public function metaDescription(): ?string
+    {
+        if (! $this->description) {
+            return null;
+        }
+
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($this->description)) ?? '');
+
+        return $text === '' ? null : Str::limit($text, 160);
     }
 
     public function isPrivate(): bool

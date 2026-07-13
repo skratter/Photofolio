@@ -11,6 +11,7 @@ class Setting extends Model
 
     protected $fillable = [
         'site_name',
+        'homepage_meta_description',
         'favicon_path',
         'logo_light_path',
         'logo_dark_path',

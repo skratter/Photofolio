@@ -69,7 +69,54 @@
 
             <flux:field>
                 <flux:label>Beschreibung</flux:label>
-                <flux:textarea wire:model="form.description" rows="3" />
+                <div
+                    wire:key="description-editor-{{ $formInstance }}"
+                    x-data
+                    x-on:trix-change="$wire.set('form.description', $event.target.value, false)"
+                >
+                    <trix-toolbar id="album-description-toolbar-{{ $formInstance }}">
+                        <div class="trix-button-row">
+                            <span class="trix-button-group trix-button-group--text-tools" data-trix-button-group="text-tools">
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-bold" data-trix-attribute="bold" data-trix-key="b" title="Fett" tabindex="-1">Fett</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-italic" data-trix-attribute="italic" data-trix-key="i" title="Kursiv" tabindex="-1">Kursiv</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-link" data-trix-attribute="href" data-trix-action="link" data-trix-key="k" title="Link" tabindex="-1">Link</button>
+                            </span>
+
+                            <span class="trix-button-group trix-button-group--block-tools" data-trix-button-group="block-tools">
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-heading-1" data-trix-attribute="heading1" title="Überschrift" tabindex="-1">Überschrift</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-quote" data-trix-attribute="quote" title="Zitat" tabindex="-1">Zitat</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-bullet-list" data-trix-attribute="bullet" title="Aufzählung" tabindex="-1">Aufzählung</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-number-list" data-trix-attribute="number" title="Nummerierung" tabindex="-1">Nummerierung</button>
+                            </span>
+
+                            <span class="trix-button-group-spacer"></span>
+
+                            <span class="trix-button-group trix-button-group--history-tools" data-trix-button-group="history-tools">
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-undo" data-trix-action="undo" data-trix-key="z" title="Rückgängig" tabindex="-1">Rückgängig</button>
+                                <button type="button" class="trix-button trix-button--icon trix-button--icon-redo" data-trix-action="redo" data-trix-key="shift+z" title="Wiederholen" tabindex="-1">Wiederholen</button>
+                            </span>
+                        </div>
+
+                        <div class="trix-dialogs" data-trix-dialogs>
+                            <div class="trix-dialog trix-dialog--link" data-trix-dialog="href" data-trix-dialog-attribute="href">
+                                <div class="trix-dialog__link-fields">
+                                    <input type="url" name="href" class="trix-input trix-input--dialog" placeholder="URL" aria-label="URL" data-trix-validate-href required data-trix-input>
+                                    <div class="trix-button-group">
+                                        <input type="button" class="trix-button trix-button--dialog" value="Link" data-trix-method="setAttribute">
+                                        <input type="button" class="trix-button trix-button--dialog" value="Entfernen" data-trix-method="removeAttribute">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </trix-toolbar>
+
+                    <input id="album-description-input-{{ $formInstance }}" type="hidden" value="{{ $form->description }}">
+                    <trix-editor
+                        toolbar="album-description-toolbar-{{ $formInstance }}"
+                        input="album-description-input-{{ $formInstance }}"
+                        class="trix-content block w-full rounded-lg border border-zinc-300 dark:border-zinc-700"
+                    ></trix-editor>
+                </div>
                 <flux:error name="form.description" />
             </flux:field>
 

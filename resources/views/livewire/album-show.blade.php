@@ -1,9 +1,22 @@
+@if ($album->isAccessible())
+    <x-slot:head>
+        @if ($metaDescription = $album->metaDescription())
+            <meta name="description" content="{{ $metaDescription }}">
+        @endif
+        <x-open-graph
+            :title="$album->title"
+            :description="$metaDescription"
+            :image="($cover = $album->effectiveCoverPhoto()) && $cover->isProcessed() ? route('albums.photos.display', [$album, $cover]) : null"
+        />
+    </x-slot:head>
+@endif
+
 <div class="mx-auto max-w-5xl px-6 pt-8 pb-16">
     <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
             <flux:heading size="xl">{{ $album->title }}</flux:heading>
             @if ($album->description)
-                <flux:text class="mt-2 text-zinc-500">{{ $album->description }}</flux:text>
+                <div class="page-content mt-2">{!! $album->description !!}</div>
             @endif
         </div>
 
