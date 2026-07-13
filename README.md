@@ -57,9 +57,31 @@ Für Beiträge/Konventionen siehe [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Tailwind CSS 4** + **Vite** für das Frontend-Build
 - **Pest** für Tests, **Pint** für Code-Formatierung, **Larastan** für statische Analyse
 
-## Installation
+## Voraussetzungen
 
-Voraussetzungen: PHP 8.5, Composer, Node.js, npm.
+Kein reines Entpacken-und-loslegen – vorausgesetzt wird eine funktionsfähige Laravel-Umgebung:
+
+- **PHP 8.5** mit den Standard-Extensions, die Laravel selbst ohnehin verlangt (`mbstring`, `pdo`,
+  `openssl`, `tokenizer`, `xml`, `ctype`, `curl`, `fileinfo` – bei jeder halbwegs aktuellen
+  PHP-Installation normalerweise schon dabei), plus drei, die konkret von Photofolio genutzt werden
+  und nicht immer standardmäßig aktiv sind:
+  - **`gd`** – Bildverarbeitung (Thumbnails/Anzeigegrößen) läuft über Intervention Image mit dem
+    GD-Treiber (`app/Actions/GeneratePhotoVariantsAction.php`), nicht Imagick.
+  - **`exif`** – EXIF-Auslese (Kamera, Blende, Aufnahmedatum, GPS, …) nutzt PHPs eigenes
+    `exif_read_data()` (`app/Actions/ExtractExifDataAction.php`).
+  - **`zip`** – ZIP-Downloads mehrerer Fotos laufen über `ZipArchive`
+    (`app/Actions/BuildPhotoZipAction.php`).
+- **Composer**, **Node.js** + **npm** für Abhängigkeiten und den Frontend-Build.
+- **Eine Datenbank** (MySQL oder SQLite; `DB_*` in der `.env`) – ein `database.sqlite` reicht für
+  kleine Instanzen völlig aus, es muss aber vorhanden sein, bevor migriert wird.
+- **Document Root des Webservers auf `public/`**, nicht auf das Projekt-Root – wie bei jeder
+  Laravel-Anwendung.
+- **Schreibrechte** für `storage/` und `bootstrap/cache/` für den Webserver-Prozess.
+- Ein Weg, wiederkehrende Jobs (Queue-Verarbeitung der Fotos, EXIF etc.) auszuführen – entweder ein
+  dauerhaft laufender Queue-Worker oder, auf Shared-Hosting ohne Prozess-Dauerbetrieb, der
+  Cron-per-HTTP-Endpunkt aus [docs/deployment.md](docs/deployment.md).
+
+## Installation
 
 ```bash
 composer install
