@@ -8,6 +8,21 @@ Sichtbarkeit ist `public` oder `private`. Private Alben verlangen ein Passwort (
 `password_hash` gespeichert); das Passwort ist beim Anlegen eines privaten Albums Pflicht und
 kann beim Bearbeiten leer gelassen werden, um das bestehende zu behalten.
 
+### Beschreibung (Rich Text)
+
+Die Beschreibung wird wie der Seiteninhalt (siehe Seiten-CMS) über einen Trix-Editor bearbeitet und
+als HTML gespeichert (`Album::$description`, kein Cast, keine serverseitige Sanitisierung – wie bei
+Seiten gilt das Nur-Admin-Zugriff-Vertrauensmodell). Erlaubt sind Fett/Kursiv, Links, Überschrift,
+Zitat und Listen. Bewusst **ohne** Bild-Upload-Button (anders als bei Seiten): eine eigene
+Attachment-Infrastruktur pro Album hätte für den eigentlichen Bedarf (etwas mehr Text, gelegentlich
+ein Link) unnötigen Umfang hinzugefügt. Ausgegeben wird die Beschreibung roh (`{!! !!}`) mit der
+`.page-content`-CSS-Klasse, identisch zur Seiten-Typografie.
+
+Der Trix-Editor im Album-Formular bekommt bei jedem Öffnen des Bearbeiten-Modals einen frischen
+`wire:key` (`AlbumManager::$formInstance`, hochgezählt in `openCreateModal()`/`openEditModal()`) –
+Trix liest seinen Startwert nur einmal beim Erzeugen des Custom Elements, ein wiederverwendetes
+DOM-Element würde sonst den Text des vorherigen Albums stehen lassen.
+
 ## Foto-Upload & Verarbeitung
 
 Fotos werden im Album direkt hochgeladen (JPG/PNG/WebP, bis 20 MB je Datei). Jeder Upload
