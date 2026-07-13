@@ -132,6 +132,10 @@ class SettingForm extends Form
             Storage::disk('public')->delete($oldPath);
         }
 
-        return $file->store('branding', 'public');
+        $path = $file->store('branding', 'public');
+
+        abort_if($path === false, 500, 'Datei konnte nicht gespeichert werden.');
+
+        return $path;
     }
 }
