@@ -8,7 +8,7 @@ class ComposerHooks
 {
     public static function boostUpdate(Event $event): void
     {
-        if (!is_dir(dirname(__DIR__, 2) . '/vendor/laravel/boost')) {
+        if (! is_dir(dirname(__DIR__, 2).'/vendor/laravel/boost')) {
             return;
         }
 

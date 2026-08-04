@@ -17,8 +17,7 @@ class ProcessUploadedPhoto implements ShouldQueue
 
     public function __construct(
         private readonly Photo $photo
-    ) {
-    }
+    ) {}
 
     public function handle(ExtractExifDataAction $extractExif, GeneratePhotoVariantsAction $generateVariants): void
     {
