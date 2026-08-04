@@ -37,11 +37,17 @@ class AlbumDownloadController extends Controller
         if ($photos->count() === 1) {
             $photo = $photos->first();
 
-            return response()->download($photo->originalPath(), $photo->downloadFilename());
+            $response = response()->download($photo->originalPath(), $photo->downloadFilename());
+            $response->headers->set('X-Robots-Tag', 'noindex');
+
+            return $response;
         }
 
         $zipPath = $buildZip->execute($photos);
 
-        return response()->download($zipPath, Str::slug($album->title).'.zip')->deleteFileAfterSend();
+        $response = response()->download($zipPath, Str::slug($album->title).'.zip')->deleteFileAfterSend();
+        $response->headers->set('X-Robots-Tag', 'noindex');
+
+        return $response;
     }
 }

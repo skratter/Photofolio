@@ -51,6 +51,29 @@ test('a public album shows meta description and open graph tags derived from its
         );
 });
 
+test('an album page renders a canonical link tag pointing at itself', function () {
+    $album = Album::factory()->create(['title' => 'Sommerurlaub']);
+
+    $response = $this->get(route('albums.show', $album->slug));
+
+    $response->assertOk()->assertSee(
+        '<link rel="canonical" href="'.route('albums.show', $album->slug).'">',
+        false
+    );
+});
+
+test('a paginated album page self-canonicalizes including the page query string', function () {
+    $album = Album::factory()->create();
+    Photo::factory()->for($album)->processed()->count(40)->create();
+
+    $response = $this->get(route('albums.show', $album->slug).'?seite=2');
+
+    $response->assertOk()->assertSee(
+        '<link rel="canonical" href="'.route('albums.show', $album->slug).'?seite=2">',
+        false
+    );
+});
+
 test('a locked private album does not leak meta description or open graph tags', function () {
     $album = Album::factory()->private()->create([
         'title' => 'Geheimalbum',

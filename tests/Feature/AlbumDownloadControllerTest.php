@@ -20,6 +20,7 @@ test('downloads a single-photo album as the original file', function () {
     $response = $this->get(route('albums.download', $album));
 
     $response->assertDownload('strand.jpg');
+    $response->assertHeader('X-Robots-Tag', 'noindex');
 });
 
 test('downloads a multi-photo album as a zip', function () {
@@ -35,6 +36,7 @@ test('downloads a multi-photo album as a zip', function () {
     $response = $this->get(route('albums.download', $album));
 
     $response->assertDownload(Str::slug($album->title).'.zip');
+    $response->assertHeader('X-Robots-Tag', 'noindex');
 });
 
 test('returns 404 for a locked private album', function () {

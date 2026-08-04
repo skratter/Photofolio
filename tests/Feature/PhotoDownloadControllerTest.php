@@ -19,6 +19,7 @@ test('downloads a single photo from a public album', function () {
     $response = $this->get(route('albums.photos.download', [$album, $photo]));
 
     $response->assertDownload('strand.jpg');
+    $response->assertHeader('X-Robots-Tag', 'noindex');
 });
 
 test('returns 404 for a photo in a locked private album', function () {

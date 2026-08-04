@@ -55,6 +55,15 @@ test('it shows the configured homepage meta description and open graph tags', fu
         ->assertSee('<meta property="og:description" content="Fotografie aus aller Welt.">', false);
 });
 
+test('it renders a canonical link tag for the configured app url, regardless of the request host', function () {
+    $response = $this->get('http://some-other-host.example/');
+
+    $response->assertOk()->assertSee(
+        '<link rel="canonical" href="'.route('home').'">',
+        false
+    );
+});
+
 test('it uses the homepage album\'s cover photo as the open graph image', function () {
     $album = Album::factory()->create(['is_homepage' => true]);
     $photo = Photo::factory()->for($album)->processed()->create();

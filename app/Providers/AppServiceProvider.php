@@ -12,6 +12,7 @@ use App\Observers\PageObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -64,6 +65,14 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureDefaults(): void
     {
+        // Generate every route()/url() link from the configured APP_URL host,
+        // never from whatever Host header the request actually arrived on.
+        // Without this, visits via a stray www/http host produce canonical
+        // tags, sitemap entries and internal links for that same duplicate
+        // host, which is exactly what causes Google to index it as a
+        // separate, un-canonicalized copy of the site.
+        URL::forceRootUrl(config('app.url'));
+
         Date::use(CarbonImmutable::class);
 
         DB::prohibitDestructiveCommands(

@@ -30,6 +30,27 @@ test('the page list shows title, slug and status', function () {
         ->assertSeeText('ueber-mich');
 });
 
+test('setting the title on a new page automatically fills in the slug', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(PageManager::class)
+        ->call('openCreateModal')
+        ->set('form.title', 'Häufige Fragen')
+        ->assertSet('form.slug', 'haufige-fragen');
+});
+
+test('editing a page\'s title does not overwrite its existing slug', function () {
+    $user = User::factory()->create();
+    $page = Page::factory()->create(['slug' => 'urspruenglicher-slug']);
+
+    Livewire::actingAs($user)
+        ->test(PageManager::class)
+        ->call('openEditModal', $page->id)
+        ->set('form.title', 'Neuer Titel')
+        ->assertSet('form.slug', 'urspruenglicher-slug');
+});
+
 test('it creates a new standard page', function () {
     $user = User::factory()->create();
 

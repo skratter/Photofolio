@@ -46,6 +46,27 @@ test('a private album cannot be saved as the homepage', function () {
     expect($album->fresh()->is_homepage)->toBeFalse();
 });
 
+test('setting the title on a new album automatically fills in the slug', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(AlbumManager::class)
+        ->call('openCreateModal')
+        ->set('form.title', 'Sommerurlaub 2026')
+        ->assertSet('form.slug', 'sommerurlaub-2026');
+});
+
+test('editing an album\'s title does not overwrite its existing slug', function () {
+    $user = User::factory()->create();
+    $album = Album::factory()->create(['slug' => 'urspruenglicher-slug']);
+
+    Livewire::actingAs($user)
+        ->test(AlbumManager::class)
+        ->call('openEditModal', $album->id)
+        ->set('form.title', 'Neuer Titel')
+        ->assertSet('form.slug', 'urspruenglicher-slug');
+});
+
 test('new albums default to downloads enabled', function () {
     $user = User::factory()->create();
 

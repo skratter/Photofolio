@@ -5,9 +5,17 @@
     'type' => 'website',
 ])
 
+@php
+    // Query string included (not just url()->current()) so paginated album
+    // views (?seite=2) self-canonicalize instead of all pointing back at page 1.
+    $canonicalUrl = url()->current().(request()->getQueryString() ? '?'.request()->getQueryString() : '');
+@endphp
+
+<link rel="canonical" href="{{ $canonicalUrl }}">
+
 <meta property="og:type" content="{{ $type }}">
 <meta property="og:title" content="{{ $title }}">
-<meta property="og:url" content="{{ url()->current() }}">
+<meta property="og:url" content="{{ $canonicalUrl }}">
 <meta name="twitter:title" content="{{ $title }}">
 
 @if ($description)

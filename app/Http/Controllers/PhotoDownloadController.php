@@ -16,6 +16,9 @@ class PhotoDownloadController extends Controller
         abort_unless($photo->isProcessed(), 404);
         abort_unless(is_file($photo->originalPath()), 404);
 
-        return response()->download($photo->originalPath(), $photo->downloadFilename());
+        $response = response()->download($photo->originalPath(), $photo->downloadFilename());
+        $response->headers->set('X-Robots-Tag', 'noindex');
+
+        return $response;
     }
 }

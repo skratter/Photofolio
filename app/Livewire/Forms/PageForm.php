@@ -46,7 +46,11 @@ class PageForm extends Form
         $this->sort_order = $page->sort_order;
     }
 
-    public function generateSlugFromTitle(): void
+    // Livewire's "updated{Property}" hook - runs automatically as part of the same
+    // debounced request that updates $title, instead of firing a separate wire:change
+    // request. Two independent requests racing against a fast form submit is what
+    // caused the intermittent "Verification failed" / component checksum errors.
+    public function updatedTitle(): void
     {
         // Only auto-fill on create; on edit the slug is already set and user-controlled,
         // overwriting it silently would break existing shared/indexed links.

@@ -57,7 +57,7 @@
 
             <flux:field>
                 <flux:label>Titel</flux:label>
-                <flux:input wire:model.live.debounce.300ms="form.title" wire:change="form.generateSlugFromTitle" />
+                <flux:input wire:model.live.debounce.300ms="form.title" />
                 <flux:error name="form.title" />
             </flux:field>
 

@@ -1,3 +1,7 @@
+<x-slot:head>
+    <x-open-graph title="Alben" />
+</x-slot:head>
+
 <div class="mx-auto max-w-5xl px-6 pt-8 pb-16">
     <flux:heading size="xl" class="mb-12">Alben</flux:heading>
 
