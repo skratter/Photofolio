@@ -41,6 +41,19 @@ test('it shows the configured light logo instead of the site name text', functio
     $response->assertOk()->assertSee(Storage::disk('public')->url('branding/logo-light.svg'), false);
 });
 
+test('the logo gets explicit width and height attributes to avoid a layout shift once it loads', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put(
+        'branding/logo-light.svg',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"></svg>'
+    );
+    Setting::current()->update(['logo_light_path' => 'branding/logo-light.svg']);
+
+    $response = $this->get('/');
+
+    $response->assertOk()->assertSee('width="120" height="40"', false);
+});
+
 test('it shows the configured homepage meta description and open graph tags', function () {
     Setting::current()->update([
         'site_name' => 'Meine Fotoseite',

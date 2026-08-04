@@ -22,6 +22,23 @@ test('a public album shows its photos directly', function () {
         ->assertDontSeeText('passwortgeschützt');
 });
 
+test('only the first photo thumbnail gets a high fetch priority hint', function () {
+    $album = Album::factory()->create();
+    $first = Photo::factory()->for($album)->processed()->create(['sort_order' => 0]);
+    $second = Photo::factory()->for($album)->processed()->create(['sort_order' => 1]);
+
+    $response = $this->get(route('albums.show', $album->slug));
+
+    $response->assertOk();
+    $html = $response->getContent();
+
+    $firstImgPos = strpos($html, route('albums.photos.thumb', [$album, $first]));
+    $secondImgPos = strpos($html, route('albums.photos.thumb', [$album, $second]));
+
+    expect(substr($html, $firstImgPos, 400))->toContain('fetchpriority="high"')
+        ->and(substr($html, $secondImgPos, 400))->not->toContain('fetchpriority="high"');
+});
+
 test('the description is rendered as raw, unescaped html', function () {
     $album = Album::factory()->create([
         'description' => '<p>Ein Wochenende in <a href="https://example.com">Beispielstadt</a>.</p>',

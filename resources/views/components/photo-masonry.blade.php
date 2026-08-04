@@ -55,6 +55,7 @@
                      that event fires into nothing and the tile stays
                      invisible forever despite the image being right there. --}}
                 <img src="{{ route('albums.photos.thumb', [$album, $photo]) }}" alt="{{ $photo->title }}"
+                    @if ($index === 0) fetchpriority="high" @endif
                     x-init="if ($el.complete) loaded = true" x-on:load="loaded = true"
                     x-bind:class="loaded ? 'opacity-100' : 'opacity-0'"
                     class="h-full w-full rounded-lg object-cover transition-[opacity,transform] duration-700 group-hover:scale-110">

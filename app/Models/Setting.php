@@ -108,6 +108,72 @@ class Setting extends Model
     }
 
     /**
+     * @return array{width: int, height: int}|null
+     */
+    public function logoLightDimensions(): ?array
+    {
+        return $this->logo_light_path ? $this->brandingDimensions($this->logo_light_path) : null;
+    }
+
+    /**
+     * @return array{width: int, height: int}|null
+     */
+    public function logoDarkDimensions(): ?array
+    {
+        return $this->logo_dark_path ? $this->brandingDimensions($this->logo_dark_path) : null;
+    }
+
+    /**
+     * Intrinsic pixel dimensions of an uploaded branding file, so <img> tags
+     * can carry width/height attributes - the browser then reserves the
+     * correct aspect ratio before the file has loaded, instead of shifting
+     * the layout once it arrives. Returns null (caller then omits the
+     * attributes, same as before) if the file is missing or its dimensions
+     * can't be determined.
+     *
+     * @return array{width: int, height: int}|null
+     */
+    private function brandingDimensions(string $path): ?array
+    {
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        $absolutePath = Storage::disk('public')->path($path);
+
+        if (str_ends_with(strtolower($path), '.svg')) {
+            return $this->svgDimensions($absolutePath);
+        }
+
+        $size = @getimagesize($absolutePath);
+
+        return $size ? ['width' => $size[0], 'height' => $size[1]] : null;
+    }
+
+    /**
+     * @return array{width: int, height: int}|null
+     */
+    private function svgDimensions(string $absolutePath): ?array
+    {
+        $contents = @file_get_contents($absolutePath);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        if (preg_match('/viewBox="[\d.\-]+\s+[\d.\-]+\s+([\d.]+)\s+([\d.]+)"/i', $contents, $matches)) {
+            return ['width' => (int) round((float) $matches[1]), 'height' => (int) round((float) $matches[2])];
+        }
+
+        if (preg_match('/width="([\d.]+)(?:px)?"/i', $contents, $widthMatch)
+            && preg_match('/height="([\d.]+)(?:px)?"/i', $contents, $heightMatch)) {
+            return ['width' => (int) round((float) $widthMatch[1]), 'height' => (int) round((float) $heightMatch[1])];
+        }
+
+        return null;
+    }
+
+    /**
      * @return list<string>
      */
     public function ownDomainsList(): array

@@ -12,10 +12,14 @@
                      just replays whatever selection was cached. --}}
                 <a href="{{ route('home') }}" class="flex items-center font-mono text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                     @if ($siteSettings->logoLightUrl())
+                        @php $lightDimensions = $siteSettings->logoLightDimensions(); @endphp
                         <img src="{{ $siteSettings->logoLightUrl() }}" alt="{{ $siteSettings->site_name }}"
+                            @if ($lightDimensions) width="{{ $lightDimensions['width'] }}" height="{{ $lightDimensions['height'] }}" @endif
                             class="h-8 w-auto {{ $siteSettings->logoDarkUrl() ? 'dark:hidden' : '' }}">
                         @if ($siteSettings->logoDarkUrl())
+                            @php $darkDimensions = $siteSettings->logoDarkDimensions(); @endphp
                             <img src="{{ $siteSettings->logoDarkUrl() }}" alt="{{ $siteSettings->site_name }}"
+                                @if ($darkDimensions) width="{{ $darkDimensions['width'] }}" height="{{ $darkDimensions['height'] }}" @endif
                                 class="hidden h-8 w-auto dark:block">
                         @endif
                     @else

@@ -26,6 +26,43 @@ test('the branding url helpers resolve the public disk url once a path is set', 
         ->and($setting->logoDarkUrl())->toBe(Storage::disk('public')->url('branding/logo-dark.svg'));
 });
 
+test('logo dimensions are null when nothing has been uploaded', function () {
+    $setting = Setting::current();
+
+    expect($setting->logoLightDimensions())->toBeNull()
+        ->and($setting->logoDarkDimensions())->toBeNull();
+});
+
+test('logo dimensions are read from an uploaded svg\'s viewBox', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put(
+        'branding/logo-light.svg',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40"></svg>'
+    );
+
+    $setting = Setting::current();
+    $setting->update(['logo_light_path' => 'branding/logo-light.svg']);
+
+    expect($setting->logoLightDimensions())->toBe(['width' => 120, 'height' => 40]);
+});
+
+test('logo dimensions are read from an uploaded raster image', function () {
+    Storage::fake('public');
+
+    $image = imagecreatetruecolor(10, 5);
+    ob_start();
+    imagepng($image);
+    $png = ob_get_clean();
+    imagedestroy($image);
+
+    Storage::disk('public')->put('branding/logo-dark.png', $png);
+
+    $setting = Setting::current();
+    $setting->update(['logo_dark_path' => 'branding/logo-dark.png']);
+
+    expect($setting->logoDarkDimensions())->toBe(['width' => 10, 'height' => 5]);
+});
+
 test('current creates a row with sensible defaults on first access', function () {
     expect(Setting::query()->count())->toBe(0);
 
