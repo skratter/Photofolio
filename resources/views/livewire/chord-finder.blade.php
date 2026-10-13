@@ -29,7 +29,7 @@
     ];
 @endphp
 
-<div x-data="chordFinder(@js(['keys' => $keys, 'progressions' => $progressions]))" x-on:keydown.window="handleKey($event)"
+<div x-data="chordFinder(@js(['keys' => $keys, 'progressions' => $progressions]))" x-on:keydown.window="handleKey($event)" x-on:touchend.window.passive="resumeAudio()" x-on:click.window="resumeAudio()"
     class="mx-auto max-w-5xl px-6 pt-8 pb-16">
     <flux:heading size="xl">Akkordfinder</flux:heading>
     <flux:text class="mt-2 max-w-2xl text-zinc-500">

@@ -566,6 +566,12 @@ export default function chordFinder({ keys, progressions }) {
                 return this.audioContext;
             }
 
+            // Safari (iOS 16.4+): Ohne diese Angabe schaltet der Stumm-Schalter
+            // des iPhones Web Audio komplett stumm.
+            if (navigator.audioSession) {
+                navigator.audioSession.type = 'playback';
+            }
+
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             // Mehrere Stimmen übereinander sollen nicht übersteuern.
@@ -575,6 +581,17 @@ export default function chordFinder({ keys, progressions }) {
             this.applyVolume();
 
             return this.audioContext;
+        },
+
+        // iOS Safari gibt Audio nur frei, wenn der Kontext in touchend/click
+        // gestartet wird - nicht in pointerdown, wo die Töne hier ausgelöst
+        // werden. Der Kontext steht bis dahin still, seine bereits geplanten
+        // Töne setzen dann ein, sobald er läuft. Safari meldet nach einem
+        // Anruf oder Tab-Wechsel außerdem den Zustand "interrupted".
+        resumeAudio() {
+            if (this.audioContext && this.audioContext.state !== 'running') {
+                this.audioContext.resume();
+            }
         },
 
         // Quadratische Kennlinie: Das Ohr empfindet Lautstärke nicht linear,
@@ -590,9 +607,7 @@ export default function chordFinder({ keys, progressions }) {
             const context = this.ensureAudio();
 
             // Browser starten den AudioContext erst nach einer Nutzeraktion.
-            if (context.state === 'suspended') {
-                context.resume();
-            }
+            this.resumeAudio();
 
             const peak = Math.min(0.3, 0.6 / semitones.length);
             const holdFor = duration ?? (spacing > 0 ? 0.8 : 1.6);
