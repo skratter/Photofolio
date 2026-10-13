@@ -244,6 +244,121 @@ document.addEventListener('alpine:init', () => {
             this.uploadNextBatch();
         },
     }));
+
+    // Akkordfinder: Tonleitern und Akkorde kommen fertig berechnet vom Server
+    // (BuildChordFinderDataAction), Halbtöne gezählt ab dem C der ersten
+    // Oktave. Hier passiert nur Auswahl, Hervorhebung und Ton.
+    Alpine.data('chordFinder', (keys) => ({
+        NOTE_NAMES: ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'],
+        // Das C4 (261,63 Hz) liegt auf Halbton 0.
+        BASE_FREQUENCY: 261.6256,
+        keys,
+        keyId: 'C',
+        degree: 1,
+        showScale: true,
+        showChord: true,
+        audioContext: null,
+
+        get currentKey() {
+            return this.keys.find((key) => key.id === this.keyId);
+        },
+        get currentChord() {
+            return this.currentKey.chords[this.degree - 1];
+        },
+        get chordNotesText() {
+            return this.currentChord.notes.map((note) => note.note).join(' – ');
+        },
+        get scaleNotesText() {
+            return this.currentKey.scale.map((note) => note.note).join(' ');
+        },
+
+        // 'chord' schlägt 'scale': Akkordtöne gehören meist auch zur
+        // Tonleiter, sollen dann aber in der Akkordfarbe erscheinen.
+        state(semitone) {
+            return this.marker(semitone)?.type ?? null;
+        },
+
+        // Was über einer Taste steht (Stufenzahl + Notenname). Die Tonleiter
+        // läuft nur einmal von der Tonika aufwärts, der Akkord liegt dort, wo
+        // seine Töne in der Tonleiter vorkommen (Terz/Quinte gern in der
+        // nächsten Oktave).
+        marker(semitone) {
+            if (this.showChord) {
+                const chordNote = this.currentChord.notes.find((note) => note.semitone === semitone);
+
+                if (chordNote) {
+                    return { type: 'chord', degree: chordNote.degree, note: chordNote.note };
+                }
+            }
+
+            if (this.showScale) {
+                const scaleNote = this.currentKey.scale.find((note) => note.semitone === semitone);
+
+                if (scaleNote) {
+                    return { type: 'scale', degree: scaleNote.degree, note: scaleNote.note };
+                }
+            }
+
+            return null;
+        },
+
+        // Direkt benachbarte Marker würden sich überlappen - jeder zweite
+        // sitzt deshalb eine Reihe höher.
+        isRaised(semitone) {
+            return semitone > 0 && this.marker(semitone) !== null && this.marker(semitone - 1) !== null && !this.isRaised(semitone - 1);
+        },
+
+        noteName(semitone) {
+            return this.NOTE_NAMES[semitone % 12];
+        },
+
+        playKey(semitone) {
+            this.playNotes([semitone]);
+        },
+
+        playChord() {
+            this.playNotes(this.currentChord.notes.map((note) => note.semitone));
+        },
+
+        playScale() {
+            const root = this.currentKey.scale[0].semitone;
+
+            this.playNotes([...this.currentKey.scale.map((note) => note.semitone), root + 12], 0.4);
+        },
+
+        // spacing = 0 spielt alle Töne gleichzeitig (Akkord), sonst nacheinander.
+        playNotes(semitones, spacing = 0) {
+            this.audioContext ??= new (window.AudioContext || window.webkitAudioContext)();
+
+            const context = this.audioContext;
+
+            // Browser starten den AudioContext erst nach einer Nutzeraktion.
+            if (context.state === 'suspended') {
+                context.resume();
+            }
+
+            const peak = Math.min(0.3, 0.5 / semitones.length);
+            const duration = spacing > 0 ? 0.8 : 1.6;
+
+            semitones.forEach((semitone, index) => {
+                const start = context.currentTime + index * spacing;
+                const oscillator = context.createOscillator();
+                const gain = context.createGain();
+
+                oscillator.type = 'triangle';
+                oscillator.frequency.value = this.BASE_FREQUENCY * 2 ** (semitone / 12);
+
+                // Kurzes Einblenden gegen Knacken, dann ausklingen lassen.
+                gain.gain.setValueAtTime(0.0001, start);
+                gain.gain.exponentialRampToValueAtTime(peak, start + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+                oscillator.connect(gain).connect(context.destination);
+                oscillator.start(start);
+                oscillator.stop(start + duration + 0.05);
+            });
+        },
+    }));
 });
 
 document.addEventListener('trix-before-initialize', () => {

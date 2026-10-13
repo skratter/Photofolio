@@ -141,6 +141,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Optional Features
+    |--------------------------------------------------------------------------
+    |
+    | Features that are not part of the photo portfolio itself and stay
+    | switched off (no route, no menu entry, no sitemap entry) unless enabled
+    | in the .env file.
+    |
+    */
+
+    'features' => [
+        'chord_finder' => env('FEATURE_CHORD_FINDER', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Admin User Seeding
     |--------------------------------------------------------------------------
     |

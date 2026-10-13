@@ -34,6 +34,14 @@
                     @foreach ($navigationPages as $page)
                         <flux:link href="{{ route('pages.show', $page->slug) }}" wire:navigate>{{ $page->title }}</flux:link>
                     @endforeach
+                    @if (Route::has('chord-finder'))
+                        <flux:dropdown>
+                            <flux:button variant="ghost" size="sm" icon-trailing="chevron-down">Sonstiges</flux:button>
+                            <flux:menu>
+                                <flux:menu.item href="{{ route('chord-finder') }}" wire:navigate icon="musical-note">Akkordfinder</flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    @endif
                 </nav>
 
                 <div class="flex gap-3">

@@ -19,6 +19,7 @@ use App\Livewire\Admin\PhotoShow;
 use App\Livewire\Admin\SettingsManager;
 use App\Livewire\AlbumIndex;
 use App\Livewire\AlbumShow as PublicAlbumShow;
+use App\Livewire\ChordFinder;
 use App\Livewire\PageShow;
 use App\Livewire\PhotoShow as PublicPhotoShow;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,10 @@ Route::get('/album/{album:slug}/{photo}/display', PublicPhotoVariantController::
     ->defaults('variant', 'display')
     ->name('albums.photos.display');
 Route::get('/album/{album:slug}/{photo}/download', PhotoDownloadController::class)->name('albums.photos.download');
+
+if (config('app.features.chord_finder')) {
+    Route::get('/akkordfinder', ChordFinder::class)->name('chord-finder');
+}
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsTxtController::class)->name('robots');

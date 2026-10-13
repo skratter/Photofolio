@@ -52,6 +52,10 @@ class SitemapController extends Controller
             }
         }
 
+        if (Route::has('chord-finder')) {
+            $urls[] = ['loc' => route('chord-finder')];
+        }
+
         foreach (Page::published()->get() as $page) {
             $urls[] = [
                 'loc' => route('pages.show', $page->slug),

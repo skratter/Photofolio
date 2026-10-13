@@ -32,6 +32,7 @@ Besucher sehen Alben-Übersicht, Album-Ansicht (Masonry-Grid mit Lightbox/Diasho
 - **Navigation & Footer**: Header mit Alben-Link, konfigurierbarem Logo und frei konfigurierbaren CMS-Seiten, Footer mit Impressum/Datenschutz und Hell/Dunkel/System-Umschalter (folgt automatisch der Browser-Präferenz)
 - **SEO**: Meta-Description (Seiten manuell, Alben/Fotos automatisch abgeleitet, Startseite über die Einstellungen), Open-Graph-/Twitter-Card-Tags, Bild-Sitemap-Erweiterung, robots.txt – Details in [docs/seo.md](docs/seo.md)
 - **Bildauslieferung**: eigene Routen für Thumbnail- und Anzeigevarianten (Admin- und öffentlich, mit Zugriffsprüfung für private Alben), nur für verarbeitete Fotos, mit Caching-Header
+- **Akkordfinder** (optional, `/akkordfinder`, Menü „Sonstiges“): Tonart und Akkord/Stufe wählen, Tonleiter und Dreiklang werden auf einer Klaviatur markiert und per Web Audio abgespielt. Standardmäßig aus, aktivierbar mit `FEATURE_CHORD_FINDER=true` in der `.env` (danach ggf. `php artisan optimize:clear`)
 - **Cron-per-HTTP**: Endpunkt (`/cron/schedule-run`, HTTP-Basic-Auth) stößt `queue:work` an – gedacht für Hosting-Umgebungen ohne dauerhaft laufenden Worker-Prozess, Details in [docs/deployment.md](docs/deployment.md)
 
 ## Dokumentation
