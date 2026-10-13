@@ -195,6 +195,7 @@ export default function chordFinder({ keys, progressions }) {
         masterGain: null,
         masterOutput: null,
         copied: false,
+        glideSemitone: null,
 
         // Akkord bestimmen
         picked: [],
@@ -464,6 +465,52 @@ export default function chordFinder({ keys, progressions }) {
                 : [...this.picked, semitone].sort((a, b) => a - b);
 
             this.identify();
+        },
+
+        // Gleiten: Wer bei gedrückter Maustaste oder mit dem Finger über die
+        // Tasten fährt, spielt jede berührte Taste an. Touch-Zeiger melden ihre
+        // Bewegung immer an die zuerst berührte Taste, deshalb wird die Taste
+        // unter dem Zeiger über die Koordinaten gesucht.
+        semitoneAt(element) {
+            const key = element?.closest?.('[data-semitone]');
+
+            return key ? parseInt(key.dataset.semitone, 10) : null;
+        },
+
+        glideStart(event) {
+            const semitone = event.button === 0 ? this.semitoneAt(event.target) : null;
+
+            if (semitone === null) {
+                return;
+            }
+
+            this.glideSemitone = semitone;
+            this.pressKey(semitone);
+        },
+
+        glideMove(event) {
+            if (this.glideSemitone === null) {
+                return;
+            }
+
+            const semitone = this.semitoneAt(document.elementFromPoint(event.clientX, event.clientY));
+
+            if (semitone === null || semitone === this.glideSemitone) {
+                return;
+            }
+
+            this.glideSemitone = semitone;
+            this.playNotes([semitone]);
+
+            // Beim Gleiten kommen Tasten nur hinzu; abwählen geht per Antippen.
+            if (this.mode === 'identify' && !this.picked.includes(semitone)) {
+                this.picked = [...this.picked, semitone].sort((a, b) => a - b);
+                this.identify();
+            }
+        },
+
+        glideEnd() {
+            this.glideSemitone = null;
         },
 
         // ---- Akkord bestimmen -------------------------------------------

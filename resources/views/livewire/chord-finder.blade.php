@@ -345,7 +345,9 @@
         {{-- Auf schmalen Displays ist die Klaviatur breiter als der Bildschirm
              und wischbar, damit die Tasten groß genug zum Treffen bleiben. --}}
         <div x-ref="scroller" class="overflow-x-auto px-3 pt-28 pb-1 sm:px-5">
-        <div class="relative min-w-[40rem] sm:min-w-0">
+        <div x-ref="keys" x-on:pointerdown="glideStart($event)" x-on:pointermove="glideMove($event)"
+            x-on:pointerup.window="glideEnd()" x-on:pointercancel.window="glideEnd()"
+            class="relative min-w-[40rem] touch-pan-y sm:min-w-0">
             @foreach ($pianoKeys as $pianoKey)
                 <div x-show="marker({{ $pianoKey['semitone'] }}) !== null" x-cloak
                     class="pointer-events-none absolute bottom-full flex -translate-x-1/2 flex-col items-center"
@@ -364,7 +366,7 @@
 
             <div class="flex h-44 sm:h-64">
                 @foreach ($pianoKeys->where('isBlack', false) as $pianoKey)
-                    <button type="button" x-on:click="pressKey({{ $pianoKey['semitone'] }})"
+                    <button type="button" x-on:click="$event.detail === 0 && pressKey({{ $pianoKey['semitone'] }})"
                         data-semitone="{{ $pianoKey['semitone'] }}"
                         x-bind:aria-label="noteName({{ $pianoKey['semitone'] }})"
                         x-bind:aria-pressed="mode === 'identify' ? picked.includes({{ $pianoKey['semitone'] }}) : null"
@@ -372,13 +374,14 @@
                             'bg-red-400 shadow-[0_10px_16px_-8px_rgba(239,68,68,0.9)]': state({{ $pianoKey['semitone'] }}) === 'chord',
                             'bg-teal-300': state({{ $pianoKey['semitone'] }}) === 'scale',
                             'bg-white hover:bg-zinc-100': state({{ $pianoKey['semitone'] }}) === null,
+                            'brightness-90': glideSemitone === {{ $pianoKey['semitone'] }},
                         }"
-                        class="flex-1 cursor-pointer touch-manipulation rounded-b-md border border-zinc-300 transition-colors select-none first:rounded-bl-lg last:rounded-br-lg focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:brightness-90 dark:border-zinc-600"></button>
+                        class="flex-1 cursor-pointer touch-pan-y rounded-b-md border border-zinc-300 transition-colors select-none first:rounded-bl-lg last:rounded-br-lg focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:brightness-90 dark:border-zinc-600"></button>
                 @endforeach
             </div>
 
             @foreach ($pianoKeys->where('isBlack', true) as $pianoKey)
-                <button type="button" x-on:click="pressKey({{ $pianoKey['semitone'] }})"
+                <button type="button" x-on:click="$event.detail === 0 && pressKey({{ $pianoKey['semitone'] }})"
                     data-semitone="{{ $pianoKey['semitone'] }}"
                     x-bind:aria-label="noteName({{ $pianoKey['semitone'] }})"
                     x-bind:aria-pressed="mode === 'identify' ? picked.includes({{ $pianoKey['semitone'] }}) : null"
@@ -386,8 +389,9 @@
                         'bg-red-500 shadow-[0_10px_16px_-8px_rgba(239,68,68,0.9)]': state({{ $pianoKey['semitone'] }}) === 'chord',
                         'bg-teal-500': state({{ $pianoKey['semitone'] }}) === 'scale',
                         'bg-zinc-900 hover:bg-zinc-700': state({{ $pianoKey['semitone'] }}) === null,
+                        'brightness-150': glideSemitone === {{ $pianoKey['semitone'] }},
                     }"
-                    class="absolute top-0 z-10 h-[60%] w-[4.5%] -translate-x-1/2 cursor-pointer touch-manipulation rounded-b-md border border-zinc-950 transition-colors select-none focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:brightness-125"
+                    class="absolute top-0 z-10 h-[60%] w-[4.5%] -translate-x-1/2 cursor-pointer touch-pan-y rounded-b-md border border-zinc-950 transition-colors select-none focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:brightness-125"
                     style="left: {{ $pianoKey['center'] }}%"></button>
             @endforeach
         </div>
@@ -396,9 +400,9 @@
         <div class="mt-5 flex items-center justify-center gap-2 px-3 text-center text-xs text-zinc-500">
             <flux:icon name="musical-note" class="size-4 shrink-0" />
             <span>
-                <span x-show="mode !== 'identify'">Tasten anklicken oder antippen zum Anhören</span>
+                <span x-show="mode !== 'identify'">Tasten anklicken oder antippen, über mehrere Tasten wischen zum Gleiten</span>
                 <span x-show="mode === 'identify'" x-cloak>Tasten antippen, um sie zum Akkord hinzuzufügen oder zu entfernen</span>
-                <span class="sm:hidden"> · Klaviatur seitlich wischen</span>
+                <span class="sm:hidden"> · Oberhalb der Tasten wischen verschiebt die Klaviatur</span>
             </span>
         </div>
 
