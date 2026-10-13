@@ -4,7 +4,6 @@ use App\Livewire\Admin\PageManager;
 use App\Models\Page;
 use App\Models\PageAttachment;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -273,11 +272,11 @@ test('cannot delete an attachment belonging to a different page', function () {
     $otherPage = Page::factory()->create();
     $attachment = PageAttachment::factory()->download()->create(['page_id' => $otherPage->id]);
 
-    expect(fn () => Livewire::actingAs($user)
+    Livewire::actingAs($user)
         ->test(PageManager::class)
         ->call('openEditModal', $page->id)
         ->call('deleteAttachment', $attachment->id)
-    )->toThrow(ModelNotFoundException::class);
+        ->assertNotFound();
 
     $this->assertModelExists($attachment);
 });

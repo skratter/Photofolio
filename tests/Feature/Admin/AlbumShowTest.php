@@ -4,7 +4,6 @@ use App\Livewire\Admin\AlbumShow;
 use App\Models\Album;
 use App\Models\Photo;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -53,10 +52,10 @@ test('setting a cover photo rejects a photo from another album', function () {
     $album = Album::factory()->create();
     $otherAlbumsPhoto = Photo::factory()->for(Album::factory())->processed()->create();
 
-    expect(fn () => Livewire::actingAs($user)
+    Livewire::actingAs($user)
         ->test(AlbumShow::class, ['album' => $album])
         ->call('setCoverPhoto', $otherAlbumsPhoto->id)
-    )->toThrow(ModelNotFoundException::class);
+        ->assertNotFound();
 });
 
 test('deleting the cover photo clears it from the album', function () {
