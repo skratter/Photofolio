@@ -37,3 +37,15 @@ test('the chord finder is not registered when the feature is disabled', function
 
     expect(Route::has('chord-finder'))->toBeFalse();
 });
+
+test('the chord finder identifies chords for the clicked keys', function () {
+    Livewire::test(ChordFinder::class)
+        ->call('identify', [4, 7, 12])
+        ->assertReturned(fn (array $result) => $result['name'] === 'C/E' && $result['inversion'] === '1. Umkehrung');
+});
+
+test('the chord finder rejects invalid key input', function () {
+    Livewire::test(ChordFinder::class)
+        ->call('identify', [0, 99])
+        ->assertHasErrors();
+});

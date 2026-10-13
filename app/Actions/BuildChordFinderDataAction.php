@@ -2,85 +2,122 @@
 
 namespace App\Actions;
 
+use App\Support\NoteSpelling;
+
 /**
- * Baut die Tonleitern und Stufenakkorde aller 12 Dur-Tonarten für den
- * Akkordfinder. Halbtöne zählen ab dem C der ersten Oktave (0 = C, 12 = C eine
- * Oktave höher), damit die Klaviatur sie ohne Umrechnung anzeigen kann.
+ * Baut die Tonleitern und Stufenakkorde (Dreiklänge und Septakkorde) aller
+ * 12 Dur- und 12 Moll-Tonarten für den Akkordfinder. Halbtöne zählen ab dem C
+ * der ersten Oktave (0 = C, 12 = C eine Oktave höher), damit die Klaviatur sie
+ * ohne Umrechnung anzeigen kann.
+ *
+ * @phpstan-type Note array{degree: int, note: string, semitone: int}
+ * @phpstan-type Chord array{degree: int, number: string, name: string, quality: string, notes: list<Note>}
+ * @phpstan-type Key array{id: string, label: string, mode: string, scale: list<Note>, chords: list<Chord>, sevenths: list<Chord>}
  */
 class BuildChordFinderDataAction
 {
-    private const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-
-    private const LETTER_SEMITONES = [0, 2, 4, 5, 7, 9, 11];
-
     private const MAJOR_SCALE_STEPS = [0, 2, 4, 5, 7, 9, 11];
+
+    private const MINOR_SCALE_STEPS = [0, 2, 3, 5, 7, 8, 10];
 
     private const KEYBOARD_SEMITONES = 24;
 
     /**
-     * Grundtöne so geschrieben, wie sie in der Praxis üblich sind (Des statt
-     * Cis, aber Fis statt Ges).
+     * Grundtöne so geschrieben, wie die Tonarten in der Praxis üblich sind
+     * (Des-Dur statt Cis-Dur, aber Fis-Dur statt Ges-Dur; bei Moll umgekehrt
+     * cis-Moll statt des-Moll).
      *
-     * @var list<string>
+     * @var array<string, list<string>>
      */
-    private const KEY_ROOTS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+    private const KEY_ROOTS = [
+        'major' => ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
+        'minor' => ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
+    ];
 
     /**
-     * @return list<array{
-     *     id: string,
-     *     label: string,
-     *     scale: list<array{degree: int, note: string, semitone: int}>,
-     *     chords: list<array{degree: int, number: string, name: string, quality: string, notes: list<array{degree: int, note: string, semitone: int}>}>
-     * }>
+     * @return list<Key>
      */
     public function execute(): array
     {
-        return array_map($this->buildKey(...), self::KEY_ROOTS);
+        $keys = [];
+
+        foreach (self::KEY_ROOTS as $mode => $roots) {
+            foreach ($roots as $root) {
+                $keys[] = $this->buildKey($root, $mode);
+            }
+        }
+
+        return $keys;
     }
 
     /**
-     * @return array{
-     *     id: string,
-     *     label: string,
-     *     scale: list<array{degree: int, note: string, semitone: int}>,
-     *     chords: list<array{degree: int, number: string, name: string, quality: string, notes: list<array{degree: int, note: string, semitone: int}>}>
-     * }
+     * Gängige Akkordfolgen als Stufenzahlen, getrennt nach Dur und Moll.
+     *
+     * @return array{major: list<array{label: string, degrees: list<int>}>, minor: list<array{label: string, degrees: list<int>}>}
      */
-    private function buildKey(string $root): array
+    public function progressions(): array
     {
-        $rootLetterIndex = array_search($root[0], self::LETTERS, true);
-        $rootSemitone = $this->semitoneOf($root);
+        return [
+            'major' => [
+                ['label' => 'Pop-Klassiker', 'degrees' => [1, 5, 6, 4]],
+                ['label' => '50er-Jahre-Folge', 'degrees' => [1, 6, 4, 5]],
+                ['label' => 'Kadenz', 'degrees' => [1, 4, 5, 1]],
+                ['label' => 'Jazz ii–V–I', 'degrees' => [2, 5, 1]],
+                ['label' => 'Pachelbel-Kanon', 'degrees' => [1, 5, 6, 3, 4, 1, 4, 5]],
+                ['label' => '12-Takt-Blues', 'degrees' => [1, 1, 1, 1, 4, 4, 1, 1, 5, 4, 1, 5]],
+            ],
+            'minor' => [
+                ['label' => 'Episch', 'degrees' => [1, 6, 3, 7]],
+                ['label' => 'Rock-Moll', 'degrees' => [1, 7, 6, 7]],
+                ['label' => 'Kadenz', 'degrees' => [1, 4, 5, 1]],
+                ['label' => 'Moll ii°–v–i', 'degrees' => [2, 5, 1]],
+            ],
+        ];
+    }
+
+    /**
+     * @return Key
+     */
+    private function buildKey(string $root, string $mode): array
+    {
+        $steps = $mode === 'major' ? self::MAJOR_SCALE_STEPS : self::MINOR_SCALE_STEPS;
+        $rootLetterIndex = NoteSpelling::letterIndex($root);
+        $rootSemitone = NoteSpelling::pitchClass($root);
 
         $scale = [];
 
-        foreach (self::MAJOR_SCALE_STEPS as $index => $step) {
+        foreach ($steps as $index => $step) {
             $letterIndex = ($rootLetterIndex + $index) % 7;
 
             $scale[] = [
                 'degree' => $index + 1,
-                'note' => $this->displayName($this->spell($letterIndex, ($rootSemitone + $step) % 12)),
+                'note' => NoteSpelling::display(NoteSpelling::spell($letterIndex, ($rootSemitone + $step) % 12)),
                 'semitone' => $rootSemitone + $step,
             ];
         }
 
         return [
-            'id' => $root,
-            'label' => $this->displayName($root).'-Dur',
+            'id' => $mode === 'major' ? $root : $root.'m',
+            'label' => NoteSpelling::display($root).($mode === 'major' ? '-Dur' : '-Moll'),
+            'mode' => $mode,
             'scale' => $scale,
-            'chords' => array_map(fn (int $index) => $this->buildChord($scale, $index), range(0, 6)),
+            'chords' => array_map(fn (int $index) => $this->buildChord($scale, $index, 3), range(0, 6)),
+            'sevenths' => array_map(fn (int $index) => $this->buildChord($scale, $index, 4), range(0, 6)),
         ];
     }
 
     /**
-     * Die Akkordtöne liegen auf denselben Tasten wie die Tonleiter: Terz und
-     * Quinte sind die übernächsten Tonleitertöne, ab der 8. Stufe eine Oktave
-     * höher. Würde der Akkord über die zwei Oktaven der Klaviatur hinausragen
-     * (z. B. Stufe 7 in H-Dur), rutscht er komplett eine Oktave nach unten.
+     * Die Akkordtöne liegen auf denselben Tasten wie die Tonleiter: Terz,
+     * Quinte (und Septime) sind die jeweils übernächsten Tonleitertöne, ab der
+     * 8. Stufe eine Oktave höher. Würde der Akkord über die zwei Oktaven der
+     * Klaviatur hinausragen (z. B. Stufe 7 in H-Dur), rutscht er komplett eine
+     * Oktave nach unten.
      *
-     * @param  list<array{degree: int, note: string, semitone: int}>  $scale
-     * @return array{degree: int, number: string, name: string, quality: string, notes: list<array{degree: int, note: string, semitone: int}>}
+     * @param  list<Note>  $scale
+     * @param  int<3, 4>  $size  3 = Dreiklang, 4 = Septakkord
+     * @return Chord
      */
-    private function buildChord(array $scale, int $index): array
+    private function buildChord(array $scale, int $index, int $size): array
     {
         $notes = array_map(function (int $scaleIndex) use ($scale) {
             $note = $scale[$scaleIndex % 7];
@@ -90,53 +127,33 @@ class BuildChordFinderDataAction
                 'note' => $note['note'],
                 'semitone' => $note['semitone'] + intdiv($scaleIndex, 7) * 12,
             ];
-        }, [$index, $index + 2, $index + 4]);
+        }, array_slice([$index, $index + 2, $index + 4, $index + 6], 0, $size));
 
-        if ($notes[2]['semitone'] >= self::KEYBOARD_SEMITONES) {
+        if (max(array_column($notes, 'semitone')) >= self::KEYBOARD_SEMITONES) {
             $notes = array_map(fn (array $note) => [...$note, 'semitone' => $note['semitone'] - 12], $notes);
         }
 
-        $thirdOffset = $notes[1]['semitone'] - $notes[0]['semitone'];
-        $fifthOffset = $notes[2]['semitone'] - $notes[0]['semitone'];
+        $third = $notes[1]['semitone'] - $notes[0]['semitone'];
+        $fifth = $notes[2]['semitone'] - $notes[0]['semitone'];
+        $seventh = isset($notes[3]) ? $notes[3]['semitone'] - $notes[0]['semitone'] : null;
         $degree = $index + 1;
 
-        [$quality, $suffix] = match (true) {
-            $thirdOffset === 4 => ['major', ''],
-            $fifthOffset === 7 => ['minor', 'm'],
-            default => ['diminished', '°'],
+        [$quality, $nameSuffix, $numberSuffix] = match (true) {
+            $seventh === null && $third === 4 => ['major', '', ''],
+            $seventh === null && $fifth === 7 => ['minor', 'm', 'm'],
+            $seventh === null => ['diminished', '°', '°'],
+            $third === 4 && $seventh === 11 => ['major7', 'maj7', 'maj7'],
+            $third === 4 => ['dominant7', '7', '⁷'],
+            $fifth === 7 => ['minor7', 'm7', 'm7'],
+            default => ['halfDiminished7', 'm7♭5', 'm7♭5'],
         };
 
         return [
             'degree' => $degree,
-            'number' => $degree.$suffix,
-            'name' => $this->displayName($scale[$index]['note']).$suffix,
+            'number' => $degree.$numberSuffix,
+            'name' => $scale[$index]['note'].$nameSuffix,
             'quality' => $quality,
             'notes' => $notes,
         ];
-    }
-
-    private function semitoneOf(string $note): int
-    {
-        $semitone = self::LETTER_SEMITONES[array_search($note[0], self::LETTERS, true)];
-
-        return match ($note[1] ?? '') {
-            '#' => ($semitone + 1) % 12,
-            'b' => ($semitone + 11) % 12,
-            default => $semitone,
-        };
-    }
-
-    private function spell(int $letterIndex, int $semitone): string
-    {
-        $offset = (($semitone - self::LETTER_SEMITONES[$letterIndex] + 18) % 12) - 6;
-
-        $accidental = $offset >= 0 ? str_repeat('#', $offset) : str_repeat('b', -$offset);
-
-        return self::LETTERS[$letterIndex].$accidental;
-    }
-
-    private function displayName(string $note): string
-    {
-        return str_replace(['##', '#', 'bb', 'b'], ['𝄪', '♯', '𝄫', '♭'], $note);
     }
 }
