@@ -82,13 +82,19 @@
     </div>
 
     <div class="mt-4 flex flex-wrap items-center gap-2">
-        <flux:button size="sm" x-on:click="showScale = ! showScale" x-bind:variant="showScale ? 'primary' : 'outline'">
-            <span class="mr-1.5 inline-block size-2 rounded-full bg-amber-400"></span>
-            Tonleiter <span x-text="showScale ? 'an' : 'aus'"></span>
+        {{-- Feste Breite, damit die Buttons beim Umschalten von "an" auf "aus"
+             nicht springen; das Lämpchen leuchtet nur, wenn der Button an ist. --}}
+        <flux:button size="sm" class="w-36 justify-center" x-on:click="showScale = ! showScale"
+            x-bind:variant="showScale ? 'primary' : 'outline'">
+            <span x-bind:class="showScale ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]' : 'bg-zinc-400/50'"
+                class="mr-1.5 inline-block size-2 rounded-full transition-colors"></span>
+            Tonleiter <span x-text="showScale ? 'an' : 'aus'" class="inline-block w-6 text-left"></span>
         </flux:button>
-        <flux:button size="sm" x-on:click="showChord = ! showChord" x-bind:variant="showChord ? 'primary' : 'outline'">
-            <span class="mr-1.5 inline-block size-2 rounded-full bg-sky-400"></span>
-            Akkord <span x-text="showChord ? 'an' : 'aus'"></span>
+        <flux:button size="sm" class="w-36 justify-center" x-on:click="showChord = ! showChord"
+            x-bind:variant="showChord ? 'primary' : 'outline'">
+            <span x-bind:class="showChord ? 'bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.9)]' : 'bg-zinc-400/50'"
+                class="mr-1.5 inline-block size-2 rounded-full transition-colors"></span>
+            Akkord <span x-text="showChord ? 'an' : 'aus'" class="inline-block w-6 text-left"></span>
         </flux:button>
 
         <flux:select size="sm" x-model="sound" aria-label="Klang" class="ml-auto max-w-44">
