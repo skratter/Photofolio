@@ -4,7 +4,7 @@
 
     <div class="flex min-h-screen flex-col">
         <header class="border-b border-zinc-200 dark:border-zinc-700">
-            <div class="mx-auto flex max-w-5xl items-center justify-between gap-6 px-6 py-4">
+            <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
                 {{-- No wire:navigate here: the homepage picks a fresh random
                      photo selection on every request, so it must never be
                      served from Livewire's SPA-navigation cache the way
@@ -27,7 +27,9 @@
                     @endif
                 </a>
 
-                <nav class="flex flex-1 flex-wrap items-center justify-end gap-x-6 gap-y-1 text-sm text-zinc-600 dark:text-zinc-300">
+                {{-- Auf schmalen Displays eine eigene Zeile unter Logo und Social-Icons,
+                     linksbündig; ab sm wie gewohnt rechts neben dem Logo. --}}
+                <nav class="order-last flex w-full flex-wrap items-center gap-x-6 gap-y-1 text-sm text-zinc-600 sm:order-none sm:w-auto sm:flex-1 sm:justify-end dark:text-zinc-300">
                     @if (Route::has('albums.index'))
                         <flux:link href="{{ route('albums.index') }}" wire:navigate>Alben</flux:link>
                     @endif
@@ -36,7 +38,7 @@
                     @endforeach
                     @if (Route::has('chord-finder'))
                         <flux:dropdown>
-                            <flux:button variant="ghost" size="sm" icon-trailing="chevron-down">Sonstiges</flux:button>
+                            <flux:button variant="ghost" size="sm" inset="left right" icon-trailing="chevron-down" class="font-normal! text-zinc-600! dark:text-zinc-300!">Sonstiges</flux:button>
                             <flux:menu>
                                 <flux:menu.item href="{{ route('chord-finder') }}" wire:navigate icon="musical-note">Akkordfinder</flux:menu.item>
                             </flux:menu>

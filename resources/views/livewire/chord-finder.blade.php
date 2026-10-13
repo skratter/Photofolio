@@ -49,8 +49,8 @@
     </div>
 
     {{-- Auswahl (Finder, Akkordfolgen, Hörtraining) --}}
-    <div x-show="mode !== 'identify'" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <flux:field>
+    <div x-show="mode !== 'identify'" class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <flux:field class="col-span-2 sm:col-span-1">
             <flux:label>Tonart</flux:label>
             <flux:select x-model="keyId">
                 <optgroup label="Dur">
@@ -88,7 +88,7 @@
             </flux:field>
         </div>
 
-        <div x-show="mode === 'explore'">
+        <div x-show="mode === 'explore'" class="col-span-2 sm:col-span-1">
             <flux:field>
                 <flux:label>Lage</flux:label>
                 <flux:select x-model.number="inversion">
@@ -292,29 +292,29 @@
     <div class="mt-4 flex flex-wrap items-center gap-2">
         {{-- Feste Breite, damit die Buttons beim Umschalten von "an" auf "aus"
              nicht springen; das Lämpchen leuchtet nur, wenn der Button an ist. --}}
-        <flux:button size="sm" class="w-36 justify-center" x-show="mode !== 'identify'" x-on:click="showScale = ! showScale"
+        <flux:button size="sm" class="flex-1 justify-center sm:w-36 sm:flex-none" x-show="mode !== 'identify'" x-on:click="showScale = ! showScale"
             x-bind:variant="showScale ? 'primary' : 'outline'">
             <span x-bind:class="showScale ? 'bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.9)]' : 'bg-zinc-400/50'"
                 class="mr-1.5 inline-block size-2 rounded-full transition-colors"></span>
             Tonleiter <span x-text="showScale ? 'an' : 'aus'" class="inline-block w-6 text-left"></span>
         </flux:button>
-        <flux:button size="sm" class="w-36 justify-center" x-show="mode === 'explore' || mode === 'progression'" x-on:click="showChord = ! showChord"
+        <flux:button size="sm" class="flex-1 justify-center sm:w-36 sm:flex-none" x-show="mode === 'explore' || mode === 'progression'" x-on:click="showChord = ! showChord"
             x-bind:variant="showChord ? 'primary' : 'outline'">
             <span x-bind:class="showChord ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.9)]' : 'bg-zinc-400/50'"
                 class="mr-1.5 inline-block size-2 rounded-full transition-colors"></span>
             Akkord <span x-text="showChord ? 'an' : 'aus'" class="inline-block w-6 text-left"></span>
         </flux:button>
 
-        <div x-show="mode !== 'identify'" class="flex">
-            <flux:button size="sm" class="rounded-r-none" x-on:click="useSevenths = false"
+        <div x-show="mode !== 'identify'" class="flex w-full sm:w-auto">
+            <flux:button size="sm" class="flex-1 rounded-r-none sm:flex-none" x-on:click="useSevenths = false"
                 x-bind:variant="! useSevenths ? 'primary' : 'outline'">Dreiklänge</flux:button>
-            <flux:button size="sm" class="-ml-px rounded-l-none" x-on:click="useSevenths = true"
+            <flux:button size="sm" class="-ml-px flex-1 rounded-l-none sm:flex-none" x-on:click="useSevenths = true"
                 x-bind:variant="useSevenths ? 'primary' : 'outline'">Vierklänge</flux:button>
         </div>
     </div>
 
-    <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <flux:select size="sm" x-model="sound" aria-label="Klang" class="max-w-44">
+    <div class="mt-2 grid grid-cols-2 items-center gap-x-3 gap-y-2 sm:flex sm:flex-wrap sm:gap-x-4">
+        <flux:select size="sm" x-model="sound" aria-label="Klang" class="sm:max-w-44">
             <option value="piano">Klang: Klavier</option>
             <option value="epiano">Klang: E-Piano</option>
             <option value="synth">Klang: Synthesizer</option>
@@ -322,19 +322,19 @@
             <option value="strings">Klang: Streicher</option>
         </flux:select>
 
-        <label class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300">
-            <flux:icon name="speaker-wave" class="size-4" />
+        <label class="order-last col-span-2 flex items-center gap-2 text-sm text-zinc-600 sm:order-none sm:col-span-1 dark:text-zinc-300">
+            <flux:icon name="speaker-wave" class="size-4 shrink-0" />
             <span class="sr-only">Lautstärke</span>
-            <input type="range" min="0" max="100" x-model.number="volume" aria-label="Lautstärke" class="w-28 accent-red-500">
+            <input type="range" min="0" max="100" x-model.number="volume" aria-label="Lautstärke" class="w-full accent-red-500 sm:w-28">
         </label>
 
-        <flux:select size="sm" x-model="notation" aria-label="Notation" class="max-w-52">
+        <flux:select size="sm" x-model="notation" aria-label="Notation" class="sm:max-w-52">
             <option value="english">Notation: C D E F G A B</option>
             <option value="german">Notation: C D E F G A H</option>
         </flux:select>
 
         <template x-if="midiSupported">
-            <div class="flex items-center gap-2">
+            <div class="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1">
                 <flux:button size="sm" variant="ghost" icon="musical-note" x-on:click="connectMidi()">MIDI-Keyboard verbinden</flux:button>
                 <span class="text-xs text-zinc-500" x-text="midiStatus"></span>
             </div>
