@@ -9,6 +9,12 @@ test('the chord finder page renders when the feature is enabled', function () {
         ->assertSeeText('Akkordfinder');
 });
 
+test('the chord finder offers several sounds', function () {
+    $this->get(route('chord-finder'))
+        ->assertSeeText('Klang: Klavier')
+        ->assertSeeText('Klang: Synthesizer');
+});
+
 test('the navigation links to the chord finder under "Sonstiges"', function () {
     $this->get(route('home'))
         ->assertSeeText('Sonstiges')

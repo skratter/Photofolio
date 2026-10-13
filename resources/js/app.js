@@ -245,6 +245,146 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Die Klänge werden live mit Web Audio synthetisiert (keine Sample-Dateien).
+    // Jede Stimme bekommt Kontext, Ausgang, Frequenz, Startzeit, Haltedauer und
+    // Lautstärke. Schlagende Klänge (Klavier, E-Piano) klingen von selbst ab,
+    // gehaltene (Synth, Orgel, Streicher) bleiben bis zur Haltedauer stehen.
+    const SILENCE = 0.0001;
+
+    const startAndStop = (oscillators, start, end) => {
+        oscillators.forEach((node) => {
+            node.start(start);
+            node.stop(end);
+        });
+    };
+
+    const createOscillator = (context, type, frequency, detuneCents = 0) => {
+        const node = context.createOscillator();
+
+        node.type = type;
+        node.frequency.value = frequency;
+        node.detune.value = detuneCents;
+
+        return node;
+    };
+
+    const createFilter = (context, type, frequency, output, q = 0.7) => {
+        const filter = context.createBiquadFilter();
+
+        filter.type = type;
+        filter.frequency.value = frequency;
+        filter.Q.value = q;
+        filter.connect(output);
+
+        return filter;
+    };
+
+    // Gemeinsame Hüllkurve für gehaltene Klänge: einblenden, halten, ausklingen.
+    const heldVoice = (context, output, start, duration, peak, attack, release, createOscillators) => {
+        const gain = context.createGain();
+
+        gain.gain.setValueAtTime(SILENCE, start);
+        gain.gain.exponentialRampToValueAtTime(peak, start + attack);
+        gain.gain.setValueAtTime(peak, Math.max(start + attack, start + duration));
+        gain.gain.exponentialRampToValueAtTime(SILENCE, start + duration + release);
+        gain.connect(output);
+
+        startAndStop(createOscillators(gain), start, start + duration + release + 0.05);
+    };
+
+    const chordFinderVoices = {
+        // Obertöne mit unterschiedlicher Abklingzeit: [Faktor, Anteil, Sekunden].
+        piano(context, output, frequency, start, duration, peak) {
+            const partials = [[1, 1, 2.6], [2, 0.5, 1.7], [3, 0.28, 1.1], [4, 0.14, 0.8], [6, 0.07, 0.5]];
+            const total = partials.reduce((sum, [, share]) => sum + share, 0);
+            const tone = createFilter(context, 'lowpass', Math.min(frequency * 8, 9000), output);
+            const oscillators = [];
+
+            partials.forEach(([factor, share, decay]) => {
+                const gain = context.createGain();
+                const node = createOscillator(context, 'sine', frequency * factor);
+
+                gain.gain.setValueAtTime(SILENCE, start);
+                gain.gain.exponentialRampToValueAtTime((peak * share) / total, start + 0.004);
+                gain.gain.exponentialRampToValueAtTime(SILENCE, start + decay);
+                gain.connect(tone);
+
+                node.connect(gain);
+                oscillators.push(node);
+            });
+
+            startAndStop(oscillators, start, start + 2.7);
+        },
+
+        // Frequenzmodulation mit abklingender Modulation: erst "Tine", dann weich.
+        epiano(context, output, frequency, start, duration, peak) {
+            const carrier = createOscillator(context, 'sine', frequency);
+            const modulator = createOscillator(context, 'sine', frequency);
+            const modulation = context.createGain();
+            const gain = context.createGain();
+
+            modulation.gain.setValueAtTime(frequency * 3, start);
+            modulation.gain.exponentialRampToValueAtTime(frequency * 0.4, start + 0.7);
+            modulator.connect(modulation).connect(carrier.frequency);
+
+            gain.gain.setValueAtTime(SILENCE, start);
+            gain.gain.exponentialRampToValueAtTime(peak, start + 0.005);
+            gain.gain.exponentialRampToValueAtTime(SILENCE, start + 2.2);
+            carrier.connect(gain).connect(output);
+
+            startAndStop([carrier, modulator], start, start + 2.3);
+        },
+
+        synth(context, output, frequency, start, duration, peak) {
+            const filter = createFilter(context, 'lowpass', 4000, output, 4);
+
+            filter.frequency.setValueAtTime(4000, start);
+            filter.frequency.exponentialRampToValueAtTime(900, start + 0.45);
+
+            heldVoice(context, filter, start, duration, peak * 0.5, 0.01, 0.25, (input) => {
+                const nodes = [
+                    createOscillator(context, 'sawtooth', frequency, -7),
+                    createOscillator(context, 'sawtooth', frequency, 7),
+                ];
+
+                nodes.forEach((node) => node.connect(input));
+
+                return nodes;
+            });
+        },
+
+        organ(context, output, frequency, start, duration, peak) {
+            const harmonics = [[1, 1], [2, 0.8], [3, 0.6], [4, 0.5], [6, 0.3], [8, 0.2]];
+            const total = harmonics.reduce((sum, [, share]) => sum + share, 0);
+
+            heldVoice(context, output, start, duration, peak, 0.02, 0.12, (input) => harmonics.map(([factor, share]) => {
+                const gain = context.createGain();
+                const node = createOscillator(context, 'sine', frequency * factor);
+
+                gain.gain.value = share / total;
+                node.connect(gain).connect(input);
+
+                return node;
+            }));
+        },
+
+        strings(context, output, frequency, start, duration, peak) {
+            const filter = createFilter(context, 'lowpass', 1500, output);
+
+            heldVoice(context, filter, start, duration, peak * 0.4, 0.35, 0.9, (input) => {
+                const nodes = [
+                    createOscillator(context, 'sawtooth', frequency, -11),
+                    createOscillator(context, 'sawtooth', frequency, 11),
+                    createOscillator(context, 'triangle', frequency / 2),
+                ];
+
+                nodes.forEach((node) => node.connect(input));
+
+                return nodes;
+            });
+        },
+    };
+
     // Akkordfinder: Tonleitern und Akkorde kommen fertig berechnet vom Server
     // (BuildChordFinderDataAction), Halbtöne gezählt ab dem C der ersten
     // Oktave. Hier passiert nur Auswahl, Hervorhebung und Ton.
@@ -258,6 +398,56 @@ document.addEventListener('alpine:init', () => {
         showScale: true,
         showChord: true,
         audioContext: null,
+        masterOutput: null,
+        sound: 'piano',
+
+        init() {
+            // Der Klang ist eine reine Komfort-Einstellung dieses Browsers.
+            try {
+                const savedSound = localStorage.getItem('chordFinderSound');
+
+                if (savedSound && savedSound in chordFinderVoices) {
+                    this.sound = savedSound;
+                }
+            } catch {
+                // Kein Zugriff auf localStorage (z. B. privater Modus): Standardklang bleibt.
+            }
+
+            this.$watch('sound', (value) => {
+                try {
+                    localStorage.setItem('chordFinderSound', value);
+                } catch {
+                    // siehe oben
+                }
+            });
+
+            this.$watch('keyId', () => this.$nextTick(() => this.scrollToHighlight()));
+            this.$watch('degree', () => this.$nextTick(() => this.scrollToHighlight()));
+        },
+
+        // Auf schmalen Displays ist die Klaviatur breiter als der Bildschirm und
+        // wischbar - beim Wechsel von Tonart/Akkord die markierten Tasten ins
+        // Bild holen.
+        scrollToHighlight() {
+            const scroller = this.$refs.scroller;
+
+            if (!scroller || scroller.scrollWidth <= scroller.clientWidth) {
+                return;
+            }
+
+            const semitones = (this.showChord ? this.currentChord.notes : this.currentKey.scale).map((note) => note.semitone);
+            const first = scroller.querySelector(`[data-semitone="${Math.min(...semitones)}"]`);
+            const last = scroller.querySelector(`[data-semitone="${Math.max(...semitones)}"]`);
+
+            if (!first || !last) {
+                return;
+            }
+
+            const middle = (first.getBoundingClientRect().left + last.getBoundingClientRect().right) / 2;
+            const target = middle - scroller.getBoundingClientRect().left + scroller.scrollLeft - scroller.clientWidth / 2;
+
+            scroller.scrollTo({ left: target, behavior: 'smooth' });
+        },
 
         get currentKey() {
             return this.keys.find((key) => key.id === this.keyId);
@@ -328,7 +518,13 @@ document.addEventListener('alpine:init', () => {
 
         // spacing = 0 spielt alle Töne gleichzeitig (Akkord), sonst nacheinander.
         playNotes(semitones, spacing = 0) {
-            this.audioContext ??= new (window.AudioContext || window.webkitAudioContext)();
+            if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Mehrere Stimmen übereinander sollen nicht übersteuern.
+                this.masterOutput = this.audioContext.createDynamicsCompressor();
+                this.masterOutput.connect(this.audioContext.destination);
+            }
 
             const context = this.audioContext;
 
@@ -337,25 +533,18 @@ document.addEventListener('alpine:init', () => {
                 context.resume();
             }
 
-            const peak = Math.min(0.3, 0.5 / semitones.length);
+            const peak = Math.min(0.3, 0.6 / semitones.length);
             const duration = spacing > 0 ? 0.8 : 1.6;
 
             semitones.forEach((semitone, index) => {
-                const start = context.currentTime + index * spacing;
-                const oscillator = context.createOscillator();
-                const gain = context.createGain();
-
-                oscillator.type = 'triangle';
-                oscillator.frequency.value = this.BASE_FREQUENCY * 2 ** (semitone / 12);
-
-                // Kurzes Einblenden gegen Knacken, dann ausklingen lassen.
-                gain.gain.setValueAtTime(0.0001, start);
-                gain.gain.exponentialRampToValueAtTime(peak, start + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-                oscillator.connect(gain).connect(context.destination);
-                oscillator.start(start);
-                oscillator.stop(start + duration + 0.05);
+                chordFinderVoices[this.sound](
+                    context,
+                    this.masterOutput,
+                    this.BASE_FREQUENCY * 2 ** (semitone / 12),
+                    context.currentTime + index * spacing,
+                    duration,
+                    peak,
+                );
             });
         },
     }));
